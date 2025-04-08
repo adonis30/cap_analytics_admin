@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "baseUrl": "./src",
+    "paths": {
+      "theme": ["./theme"],
+      "scenes/*": ["./scenes/*"],
+      "components/*": ["./components/*"],
+      "store/*": ["./store/*"],
+      "state": ["./state"]
+    }
+  },
+  "include": ["src"]
+}

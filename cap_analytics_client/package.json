@@ -1,0 +1,95 @@
+{
+  "name": "cap_analytics_client",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@clerk/clerk-react": "^5.24.1",
+    "@date-io/date-fns": "^3.2.1",
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.0",
+    "@headlessui/react": "^2.2.0",
+    "@hookform/resolvers": "^4.1.3",
+    "@mui/icons-material": "^6.4.7",
+    "@mui/material": "^6.4.9",
+    "@mui/system": "^6.4.7",
+    "@mui/x-data-grid": "^7.24.0",
+    "@mui/x-date-pickers": "^7.28.0",
+    "@nivo/bar": "^0.88.0",
+    "@nivo/core": "^0.88.0",
+    "@nivo/geo": "^0.88.0",
+    "@nivo/pie": "^0.88.0",
+    "@radix-ui/react-alert-dialog": "^1.1.6",
+    "@radix-ui/react-dialog": "^1.1.6",
+    "@radix-ui/react-dropdown-menu": "^2.1.6",
+    "@radix-ui/react-tooltip": "^1.1.8",
+    "@reduxjs/toolkit": "^2.5.0",
+    "@shadcn/ui": "^0.0.4",
+    "@uploadthing/react": "^7.3.0",
+    "ajv": "^8.17.1",
+    "axios": "^1.7.9",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "cra-template": "1.2.0",
+    "date-fns": "^2.28.0",
+    "framer-motion": "^12.4.7",
+    "lucide-react": "^0.477.0",
+    "radix-ui": "^1.1.3",
+    "react": "^18.2.0",
+    "react-datepicker": "^7.6.0",
+    "react-dom": "^18.2.0",
+    "react-dropzone": "^14.3.5",
+    "react-hook-form": "^7.54.2",
+    "react-hot-toast": "^2.5.2",
+    "react-mui-multiselect-dropdown": "^1.0.3",
+    "react-redux": "^9.2.0",
+    "react-router-dom": "^6.28.2",
+    "react-scripts": "^5.0.1",
+    "react-select": "^5.10.1",
+    "react-toastify": "^11.0.5",
+    "sonner": "^2.0.1",
+    "tailwind-merge": "^3.0.2",
+    "tailwind-variants": "^1.0.0",
+    "uploadthing": "^7.6.0",
+    "web-vitals": "^4.2.4",
+    "yup": "^1.6.1",
+    "zod": "^3.24.2",
+    "zustand": "^5.0.3"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "devDependencies": {
+    "@babel/plugin-proposal-nullish-coalescing-operator": "^7.18.6",
+    "@babel/plugin-proposal-optional-chaining": "^7.21.0",
+    "@types/body-parser": "^1.19.5",
+    "@types/react-dom": "^19.0.4",
+    "@types/react-transition-group": "^4.4.12",
+    "autoprefixer": "^10.4.21",
+    "browserify-zlib": "^0.2.0",
+    "postcss": "^8.5.3",
+    "stream-browserify": "^3.0.0",
+    "tailwindcss": "^3.4.17",
+    "webpack-cli": "^6.0.1"
+  }
+}
