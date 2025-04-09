@@ -4,7 +4,7 @@
   "private": true,
   "dependencies": {
     "@clerk/clerk-react": "^5.24.1",
-    "@date-io/date-fns": "^3.2.1",
+    "@date-io/date-fns": "^2.17.0",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
     "@headlessui/react": "^2.2.0",
