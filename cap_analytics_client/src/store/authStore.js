@@ -1,9 +1,13 @@
 import { create } from "zustand";
 
-import axios from "axios";
-const API_URL =  "http://localhost:5001/api/v1/auth"; 
- 
 
+import axios from "axios";
+const url = 'api/v1/auth';
+const baseURL = process.env.REACT_APP_BASE_URL;
+const API_URL = `${baseURL}/${url}`;
+
+ 
+console.log("baseurl", API_URL)
 axios.defaults.withCredentials = true;
 
 export const useAuthStore = create((set) => ({
