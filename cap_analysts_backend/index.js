@@ -27,6 +27,10 @@ import { fileURLToPath } from 'url';
 /* CONFIGURATION */
 dotenv.config();
 const app = express();
+const allowedOrigins = [
+  'http://localhost:3000',
+  'https://cap-analytics-admin-1.onrender.com',
+];
 app.use(express.json());
 app.use(helmet());
 app.use(helmet.crossOriginResourcePolicy({ policy: "cross-origin" }));
@@ -34,9 +38,14 @@ app.use(morgan("common"));
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(cors({
-  origin: 'http://localhost:3000',  // Your frontend URL
-  credentials: true,  // Allow cookies
-  allowedHeaders: ['Authorization', 'Content-Type', 'Cookie'],  // Add 'Cookie' here
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true, // if you're sending cookies/auth
 }));
 
  
