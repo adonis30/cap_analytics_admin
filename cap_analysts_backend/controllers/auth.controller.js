@@ -8,7 +8,8 @@ import { generateTokenAndSetCookie } from "../utils/generateTokenAndSetCookie.js
 export const signup = async (req, res, next) => {
     const session = await mongoose.startSession();
     session.startTransaction();
-
+  
+   
     try {  
         const { email, password, firstName, lastName } = req.body; 
         
@@ -38,6 +39,7 @@ export const signup = async (req, res, next) => {
         // Create a new user
         const newUser = await User.create([{
             email,
+            username: email, // Assuming username is the same as email
             password: hashedPassword,
             firstName,
             lastName,

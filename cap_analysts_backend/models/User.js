@@ -25,6 +25,12 @@ const UserSchema = new mongoose.Schema(
       required: true,
       min: 5,
     },
+    username: {
+      type: String,
+      required: true,
+      min: 2,
+      max: 100,
+    },
     clerkId: { type: String, unique: false, required: false },
     city: String,
     state: String,
@@ -35,7 +41,7 @@ const UserSchema = new mongoose.Schema(
     role: {
       type: String,
       enum: ["user", "admin", "superadmin"],
-      default: "user",
+      default: "admin",
     },
   },
   { timestamps: true }
