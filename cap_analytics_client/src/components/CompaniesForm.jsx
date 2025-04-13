@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef, useMemo } from "react";
-import { useForm, Controller } from "react-hook-form";
+import { useState, useEffect, useRef, useMemo, useCallback } from "react";
+import { useForm, Controller, useWatch } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { toast } from "sonner";
@@ -15,12 +15,14 @@ import {
   CircularProgress,
   Card,
   CardMedia,
+  cardActionAreaClasses,
 } from "@mui/material";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
-
-import { DatePicker } from "@mui/x-date-pickers";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import dayjs from "dayjs";
 import { UploadDropzone } from "@uploadthing/react"; // Import Uploadthing's dropzone
-
+import { LocalizationProvider } from "@mui/x-date-pickers";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import {
   useCreateCompanyMutation,
   useUpdateCompanyMutation,
@@ -63,7 +65,7 @@ const schema = yup.object().shape({
     .of(yup.string())
     .required("At least one funding instrument is required"),
   contactNumber: yup.string(),
-  imageUrl: yup.string().nullable().required("Image is required"),
+  imageUrl: yup.string().nullable(),
 
   operatingStatus: yup
     .string()
@@ -81,9 +83,7 @@ const CompaniesForm = ({ company, companyId }) => {
     isLoading,
     error,
   } = useGetCompanyByIdQuery(companyId);
-  console.log("data", company1);
 
-  console.log("Company data debora:", company);
   const navigate = useNavigate();
 
   // Fetch data from APIs
@@ -223,22 +223,30 @@ const CompaniesForm = ({ company, companyId }) => {
           label: fr.name,
         }))
       : [];
+
+  const categoryOptions =
+    Array.isArray(categoriesData?.categories) &&
+    categoriesData.categories.length > 0
+      ? categoriesData.categories.map((c) => ({
+          value: c._id,
+          label: c.name,
+        }))
+      : [];
+
   const getDefaultMultiSelectValues = (selected = [], options = []) => {
-    const selectedIds = selected.map((item) =>
-      typeof item === "string" ? item : item?.value
-    );
+    if (!Array.isArray(selected)) return [];
 
-    return options.filter(
-      (opt) => selectedIds.includes(String(opt.value)) // Force comparison as string
-    );
+    const selectedIds = selected
+      .map((item) => {
+        if (typeof item === "string") return item;
+        if (item && typeof item === "object" && "value" in item)
+          return item.value;
+        return null;
+      })
+      .filter(Boolean); // Remove nulls and undefined
+
+    return options.filter((opt) => selectedIds.includes(String(opt.value)));
   };
-
-  // Options
-  const categoryOptions = useMemo(() => {
-    return (
-      categoriesData?.map((cat) => ({ value: cat._id, label: cat.name })) ?? []
-    );
-  }, [categoriesData]);
 
   const fundingTypeOptions = useMemo(() => {
     return (
@@ -248,11 +256,6 @@ const CompaniesForm = ({ company, companyId }) => {
       })) ?? []
     );
   }, [fundingTypesData]);
-
-  // Selected values
-  const selectedCategoryValues = useMemo(() => {
-    return getDefaultMultiSelectValues(watch("categories"), categoryOptions);
-  }, [watch("categories"), categoryOptions]);
 
   const selectedFundingTypeValues = useMemo(() => {
     return getDefaultMultiSelectValues(
@@ -275,35 +278,41 @@ const CompaniesForm = ({ company, companyId }) => {
     );
     const optionIds = categoryOptions.map((opt) => opt.value);
 
-    console.log("🟩 Selected IDs:", selectedIds);
-    console.log("🟦 Option IDs:", optionIds);
-
     const matched = categoryOptions.filter((opt) =>
       selectedIds.includes(String(opt.value))
     );
-    console.log("🟨 Matched values:", matched);
   }, [watch("categories"), categoryOptions]);
 
   // Watch selected categories and update industries in the background
   useEffect(() => {
     setValue("industries", selectedCategories); // Sync selectedCategories to industries without rendering
+    console.log(
+      "Selected categories updated in industries field:",
+      selectedCategories
+    );
   }, [selectedCategories, setValue]);
 
   const handleImageChange = (event) => {
     const file = event.target.files[0];
     if (file) {
-      setSelectedFile(file); // Store the File object
+      setSelectedFile(file);
       const reader = new FileReader();
       reader.onloadend = () => {
         setPreviewUrl(reader.result);
       };
       reader.readAsDataURL(file);
-      console.log("Image file selected:", file);
+
+      // ✅ Set imageUrl in form state for validation
+      setValue("imageUrl", file.name || "uploaded-file", {
+        shouldValidate: true,
+        shouldDirty: true,
+      });
     }
   };
 
+  console.log("Form errors:", errors);
+  toast.error(error);
   const onSubmit = async (values) => {
-    console.log("Form values before API call:", values);
     setIsSubmitting(true);
 
     // Validate image file before proceeding
@@ -329,7 +338,6 @@ const CompaniesForm = ({ company, companyId }) => {
         const formData = new FormData();
         formData.append("imageUrl", selectedFile);
         const uploadResponse = await initiateUpload(formData).unwrap();
-        console.log("Upload response:", uploadResponse);
 
         // Adjust based on your response structure:
         if (uploadResponse && uploadResponse.url) {
@@ -338,8 +346,6 @@ const CompaniesForm = ({ company, companyId }) => {
           throw new Error("Unexpected upload response structure");
         }
       }
-
-      console.log("Proceeding to create company with values:", values);
 
       // Proceed with creating or updating the company
       if (formMode === "create") {
@@ -355,13 +361,12 @@ const CompaniesForm = ({ company, companyId }) => {
           companyId,
           company: values,
         }).unwrap();
-        console.log("Update Company Response:", response);
+
         toast.success("Company updated successfully!");
       }
 
       navigate("/companies");
     } catch (error) {
-      console.error("Error in submission:", error);
       if (error.response) {
         toast.error(`Server Error: ${error.response.data.message}`);
       } else if (error.request) {
@@ -414,28 +419,26 @@ const CompaniesForm = ({ company, companyId }) => {
             </Grid>
 
             <Grid item xs={12} md={4}>
-              <MultiSelectDropdown
-                options={
-                  categoriesData?.map((cat) => ({
-                    value: cat._id,
-                    label: cat.name,
-                  })) ?? []
-                }
-                defaultValue={getDefaultMultiSelectValues(
-                  selectedCategories,
-                  categoriesData?.map((cat) => ({
-                    value: cat._id,
-                    label: cat.name,
-                  })) ?? []
-                )}
-                onChange={(values) =>
-                  handleDropdownChange(values, "categories")
-                }
-                placeholder="Select Categories"
-                createOption={(inputValue) =>
-                  handleAddOption(createCategory, inputValue, "Category")
-                }
-              />
+              {categoriesData.length > 0 ? (
+                <MultiSelectDropdown
+                  options={
+                    categoriesData?.map((c) => ({
+                      value: c._id,
+                      label: c.name,
+                    })) ?? []
+                  }
+                  defaultValue={selectedCategories ?? []}
+                  onChange={(values) =>
+                    handleDropdownChange(values, "categories")
+                  }
+                  placeholder="Select Categories"
+                  createOption={(inputValue) =>
+                    handleAddOption(createCategory, inputValue, "Category")
+                  }
+                />
+              ) : (
+                <Typography>Loading categories...</Typography> // Or a loading spinner
+              )}
             </Grid>
 
             <Grid item xs={12}>
@@ -581,25 +584,29 @@ const CompaniesForm = ({ company, companyId }) => {
             </Grid>
 
             <Grid item xs={12} md={4}>
-              <Controller
-                name="fundedDate"
-                control={control}
-                render={({ field }) => (
-                  <DatePicker
-                    label="Funded Date"
-                    value={field.value}
-                    onChange={(date) => field.onChange(date)}
-                    renderInput={(params) => (
-                      <TextField
-                        {...params}
-                        fullWidth
-                        error={!!errors.fundedDate}
-                        helperText={errors.fundedDate?.message}
-                      />
-                    )}
-                  />
-                )}
-              />
+              <LocalizationProvider dateAdapter={AdapterDayjs}>
+                <Controller
+                  name="fundedDate"
+                  control={control}
+                  render={({ field }) => (
+                    <DatePicker
+                      {...field}
+                      label="Funded Date"
+                      value={
+                        company1?.fundedDate ? dayjs(company1.fundedDate) : null
+                      }
+                      onChange={(date) => field.onChange(date)}
+                      slotProps={{
+                        textField: {
+                          fullWidth: true,
+                          error: !!errors.fundedDate,
+                          helperText: errors.fundedDate?.message,
+                        },
+                      }}
+                    />
+                  )}
+                />
+              </LocalizationProvider>
             </Grid>
 
             <Grid item xs={12} md={4}>
@@ -632,8 +639,8 @@ const CompaniesForm = ({ company, companyId }) => {
                     ? "Updating..."
                     : "Creating..."
                   : formMode === "update"
-                  ? "Update Company"
-                  : "Create Company"}
+                    ? "Update Company"
+                    : "Create Company"}
               </Button>
             </Grid>
           </Grid>

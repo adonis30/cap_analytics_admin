@@ -4,8 +4,8 @@ import CompanyForm from "components/CompaniesForm";
 import { useNavigate } from "react-router-dom"; 
 import { useCreateCompanyMutation } from "state/api";
 import { toast } from "react-hot-toast";
-import { LocalizationProvider } from '@mui/x-date-pickers';
-import DateFnsAdapter from '@date-io/date-fns';
+ 
+
 
 const CreateCompanyPage = () => {
   const navigate = useNavigate();
@@ -27,12 +27,12 @@ const CreateCompanyPage = () => {
   };
 
   return (
-    <LocalizationProvider dateAdapter={DateFnsAdapter}>
+    
     <div className="max-w-4xxl mx-auto p-6 shadow-lg rounded-lg">
       <h1 className="text-2xl font-bold mb-4">Create a New Company</h1>
       <CompanyForm onSubmit={handleCreateCompany} />
     </div>
-    </LocalizationProvider>
+     
   );
 };
 

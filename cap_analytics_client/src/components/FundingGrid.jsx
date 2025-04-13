@@ -1,9 +1,13 @@
 import React from "react";
 import { DataGrid } from "@mui/x-data-grid";
 import { useTheme } from "@mui/material";
+import { useDeleteFundingInstrumentMutation, useDeleteFundingRoundMutation, useDeleteFundingTypeMutation } from "state/api";
 
 const FundingGrid = ({ data, type }) => {
   const theme = useTheme();
+
+  const [deleteFundingTpes, {isLoading: isDeletingFundingTpes }] = useDeleteFundingTypeMutation();
+  const [deleteFundingInstrument , {isLoading: isDeletingFundingInstruments}] = useDeleteFundingInstrumentMutation();
 
   const columns = [
     { field: "name", headerName: "Name", width: 200 },

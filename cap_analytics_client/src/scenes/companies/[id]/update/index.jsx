@@ -2,8 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Box, CircularProgress } from "@mui/material";
 import { useGetCompanyByIdQuery, useUpdateCompanyMutation } from "state/api";
-import { LocalizationProvider } from '@mui/x-date-pickers';
-import DateFnsAdapter from '@date-io/date-fns';
+  
 import CompanyForm from "components/CompaniesForm";
 const EditCompany = () => {
   const { id } = useParams();
@@ -65,7 +64,7 @@ const EditCompany = () => {
 
    
   return (
-    <LocalizationProvider dateAdapter={DateFnsAdapter}>
+     
     <div className="max-w-4xxl mx-auto p-6 shadow-lg rounded-lg">
       <h1 className="text-2xl font-bold mb-4">Update Company details</h1>
       <CompanyForm 
@@ -76,7 +75,6 @@ const EditCompany = () => {
        
       />
     </div>
-    </LocalizationProvider>
   );
 };
 
