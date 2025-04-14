@@ -102,7 +102,10 @@ function App() {
               <Route path="/companies/create" element={<CompanyForm />} />
               <Route path="/companies/update/:id" element={<EditCompany />} />
               <Route path="/investors" element={<Investors />} />
+              <Route path="/investors/create" element={<CompanyForm />} />
+              <Route path="/investors/update/:id" element={<EditCompany />} />
               <Route path="/fundings" element={<FundingOverview />} />
+              
               <Route
                 path="/fundings/create/instruments"
                 element={<CreateInstrument />}

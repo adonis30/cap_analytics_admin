@@ -8,7 +8,7 @@ const EditCompany = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { data: company, isLoading, error } = useGetCompanyByIdQuery(id);
-  console.log(company);
+  
   const [updateCompany, { isLoading: isUpdating, error: updateError }] = useUpdateCompanyMutation();
 
   const [formData, setFormData] = useState({

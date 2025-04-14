@@ -112,32 +112,30 @@ const Dashboard = () => {
           <Button
             variant="contained"
             color="secondary"
-            onClick={() => navigate("/funding/create")}
+            onClick={() => navigate("/fundings/create/instruments")}
           >
             Create Funding Instrument
           </Button>
           <Button
             variant="contained"
             color="success"
-            onClick={() => navigate("/funding/create")}
+            onClick={() => navigate("/fundings/create/types")}
           >
             Create Funding Type
           </Button>
           <Button
             variant="contained"
             color="warning"
-            onClick={() => navigate("/funding/create")}
+            onClick={() => navigate("/fundings/create/rounds")}
           >
             Create Funding Round
           </Button>
-          <Button
-            sx={{
-              backgroundColor: theme.palette.secondary.light,
-              color: theme.palette.background.alt,
-            }}
+            <Button
+            variant="contained"
+            color="warning"
+            onClick={() => navigate("/investors/create")}
           >
-            <DownloadOutlined sx={{ mr: "10px" }} />
-            Download Reports
+            Create Investor
           </Button>
         </Box>
       </FlexBetween>

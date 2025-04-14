@@ -179,15 +179,18 @@ const CompaniesForm = ({ company, companyId }) => {
         operatingStatus,
         industries: company1?.industries || [], // Assuming industries is an array
         imageUrl: imageUrl ?? "", // for validation purposes
-        fundedDate: fundedDate ? new Date(fundedDate) : null,
+        fundedDate: fundedDate ? dayjs(fundedDate) : null,
+
         categories: (categories ?? []).map((c) =>
           typeof c === "string" ? c : c._id
         ),
         fundingRounds: fundingRounds ?? [],
-        fundingTypes: fundingTypes ?? [],
+        fundingTypes: (fundingTypes ?? []).map((ft) =>
+          typeof ft === "string" ? ft : ft._id
+        ),
         fundingInstruments: fundingInstruments ?? [],
       });
-
+       
       // Also show image preview if available
       if (imageUrl) {
         setPreviewUrl(imageUrl);
@@ -288,10 +291,7 @@ const CompaniesForm = ({ company, companyId }) => {
   // Watch selected categories and update industries in the background
   useEffect(() => {
     setValue("industries", selectedCategories); // Sync selectedCategories to industries without rendering
-    console.log(
-      "Selected categories updated in industries field:",
-      selectedCategories
-    );
+     
   }, [selectedCategories, setValue]);
 
   const handleImageChange = (event) => {
@@ -312,63 +312,66 @@ const CompaniesForm = ({ company, companyId }) => {
     }
   };
 
-  console.log("Form errors:", errors);
-  toast.error(error);
+   
   const onSubmit = async (values) => {
     setIsSubmitting(true);
-
-    // Validate image file before proceeding
-    if (!selectedFile) {
-      toast.error("Please upload an image.");
-      setIsSubmitting(false);
-      return;
-    }
-    if (selectedFile.size > MAX_FILE_SIZE) {
-      toast.error("File is too large. Maximum size is 5MB.");
-      setIsSubmitting(false);
-      return;
-    }
-    if (!SUPPORTED_FORMATS.includes(selectedFile.type)) {
-      toast.error("Unsupported file format. Please upload JPG, JPEG, or PNG.");
-      setIsSubmitting(false);
-      return;
-    }
-
+  
     try {
-      // Upload the image first before creating the company
+      // ✅ CASE: New image is selected
       if (selectedFile) {
+        if (selectedFile.size > MAX_FILE_SIZE) {
+          toast.error("File is too large. Maximum size is 5MB.");
+          setIsSubmitting(false);
+          return;
+        }
+  
+        if (!SUPPORTED_FORMATS.includes(selectedFile.type)) {
+          toast.error("Unsupported file format. Please upload JPG, JPEG, or PNG.");
+          setIsSubmitting(false);
+          return;
+        }
+  
         const formData = new FormData();
         formData.append("imageUrl", selectedFile);
+  
         const uploadResponse = await initiateUpload(formData).unwrap();
-
-        // Adjust based on your response structure:
-        if (uploadResponse && uploadResponse.url) {
+        if (uploadResponse?.url) {
           values.imageUrl = uploadResponse.url;
         } else {
           throw new Error("Unexpected upload response structure");
         }
+      } else {
+        // ✅ CASE: No new image selected – use existing one
+        const currentImage = watch("imageUrl"); // already set from defaultValues
+        if (!currentImage) {
+          toast.error("Please upload an image.");
+          setIsSubmitting(false);
+          return;
+        }
+        values.imageUrl = currentImage;
       }
-
-      // Proceed with creating or updating the company
+  
+      // ✅ Create or Update company
       if (formMode === "create") {
         const response = await createCompany({ company: values }).unwrap();
-        console.log("Create Company Response:", response);
+         
         toast.success("Company created successfully!");
       } else {
         if (!companyId) {
           toast.error("Missing company ID for update");
           return;
         }
+  
         const response = await updateCompany({
           companyId,
           company: values,
         }).unwrap();
-
         toast.success("Company updated successfully!");
       }
-
+  
       navigate("/companies");
     } catch (error) {
+      toast.error("Failed to create/update company");
       if (error.response) {
         toast.error(`Server Error: ${error.response.data.message}`);
       } else if (error.request) {
@@ -380,7 +383,7 @@ const CompaniesForm = ({ company, companyId }) => {
       setIsSubmitting(false);
     }
   };
-
+  
   if (
     fundingRoundsLoading ||
     fundingTypesLoading ||
@@ -604,9 +607,7 @@ const CompaniesForm = ({ company, companyId }) => {
                     <DatePicker
                       {...field}
                       label="Founded Date"
-                      value={
-                        company1?.fundedDate ? dayjs(company1.fundedDate) : null
-                      }
+                      value={field.value}
                       onChange={(date) => field.onChange(date)}
                       slotProps={{
                         textField: {

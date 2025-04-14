@@ -91,12 +91,12 @@ export const api = createApi({
       invalidatesTags: ['Company'], // Invalidate cache to refresh
     }),
     updateCompany: build.mutation({
-      query: ({ id, ...updatedData }) => ({
-        url: `${url}company/${id}`,
+      query: ({ companyId, company }) => ({
+        url: `${url}company/${companyId}`,
         method: 'PUT',
-        body: updatedData,
+        body: company, // <- Send only the company object
       }),
-      invalidatesTags: (result, error, { id }) => [{ type: 'Company', id }],
+      invalidatesTags: (result, error, { companyId }) => [{ type: 'Company', companyId }],
     }),
     deleteCompany: build.mutation({
       query: (id) => ({
