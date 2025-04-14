@@ -38,7 +38,7 @@ const CompaniesGrid = () => {
     { field: "industries", headerName: "Industry", width: 200 },
     { field: "location", headerName: "Location", width: 200 },
     { field: "contactEmail", headerName: "Contact Email", width: 250 },
-    { field: "fundedDate", headerName: "Funded Date", width: 150 },
+    { field: "fundedDate", headerName: "Founded Date", width: 150 },
     {
       field: "actions",
       headerName: "Actions",

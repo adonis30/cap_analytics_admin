@@ -65,6 +65,7 @@ const schema = yup.object().shape({
     .of(yup.string())
     .required("At least one funding instrument is required"),
   contactNumber: yup.string(),
+  contactEmail: yup.string().email("Invalid email format"),
   imageUrl: yup.string().nullable(),
 
   operatingStatus: yup
@@ -119,6 +120,7 @@ const CompaniesForm = ({ company, companyId }) => {
     industries: company?.industries || [],
     location: company?.location || "",
     contactNumber: company?.contactNumber || "",
+    contactEmail: company?.contactEmail || "",
     fundedDate: company?.fundedDate || null,
     imageUrl: company?.imageUrl || "",
     categories: company?.categories || [],
@@ -441,6 +443,16 @@ const CompaniesForm = ({ company, companyId }) => {
               )}
             </Grid>
 
+            <Grid item xs={12} md={4}>
+              <TextField
+                fullWidth
+                label="Company email"
+                {...register("contactEmail")}
+                error={!!errors.contactEmail}
+                helperText={errors.contactEmail?.message}
+              />
+            </Grid>
+
             <Grid item xs={12}>
               <TextField
                 fullWidth
@@ -496,7 +508,7 @@ const CompaniesForm = ({ company, companyId }) => {
             <Grid item xs={12} md={4}>
               <MultiSelectDropdown
                 options={fundingTypeOptions}
-                defaultValue={selectedFundingTypeValues}
+                defaultValue={selectedFundingTypes}
                 onChange={(values) =>
                   handleDropdownChange(values, "fundingTypes")
                 }
@@ -591,7 +603,7 @@ const CompaniesForm = ({ company, companyId }) => {
                   render={({ field }) => (
                     <DatePicker
                       {...field}
-                      label="Funded Date"
+                      label="Founded Date"
                       value={
                         company1?.fundedDate ? dayjs(company1.fundedDate) : null
                       }
