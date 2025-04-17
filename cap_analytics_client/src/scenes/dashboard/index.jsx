@@ -112,21 +112,21 @@ const Dashboard = () => {
           <Button
             variant="contained"
             color="secondary"
-            onClick={() => navigate("/fundings/create/instruments")}
+            onClick={() => navigate("/fundings/create/FundingInstrument")}
           >
             Create Funding Instrument
           </Button>
           <Button
             variant="contained"
             color="success"
-            onClick={() => navigate("/fundings/create/types")}
+            onClick={() => navigate("/fundings/create/FundingType")}
           >
             Create Funding Type
           </Button>
           <Button
             variant="contained"
             color="warning"
-            onClick={() => navigate("/fundings/create/rounds")}
+            onClick={() => navigate("/fundings/create/FundingRound")}
           >
             Create Funding Round
           </Button>
