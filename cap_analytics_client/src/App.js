@@ -17,6 +17,9 @@ import {
   CreateInstrument,
   CreateType,
   CreateRound,
+  EditInstrument,
+  EditType,
+  EditRound,
 } from "scenes/funding/create";
 import SignIn from "./components/SignIn";
 import SignUp from "./components/SignUp";
@@ -24,7 +27,6 @@ import { useAuthStore } from "./store/authStore";
 import { Toaster } from "react-hot-toast";
 import LoadingSpinner from "components/LoadingSpinner";
 import EditCompany from "scenes/companies/[id]/update";
-import CreateInvestorForm from "components/CreateInvestorForm";
 import CreateInvestorPage from "scenes/investors/create";
 import EditInvestor from "scenes/investors/[id]/update";
 
@@ -112,11 +114,15 @@ function App() {
               <Route path="/fundings" element={<FundingOverview />} />
 
               <Route
-                path="/fundings/create/instruments"
-                element={<CreateInstrument />}
+                path="/fundings/create/FundingInstrument"element={<CreateInstrument />}
               />
-              <Route path="/fundings/create/types" element={<CreateType />} />
-              <Route path="/fundings/create/rounds" element={<CreateRound />} />
+              <Route path="/fundings/update/FundingInstrument/:id" element={<EditInstrument />} />
+              <Route path="/fundings/create/FundingType" element={<CreateType />} />
+              <Route path="/fundings/update/FundingType/:id" element={<EditType />} />
+              <Route path="/fundings/create/FundingRound" element={<CreateRound />} />
+              <Route path="/fundings/update/FundingRound/:id" element={<EditRound />} />
+
+              {/* Users route */}
               <Route path="/users" element={<Users />} />
             </Route>
 

@@ -1,13 +1,20 @@
 import React from "react";
 import { DataGrid } from "@mui/x-data-grid";
-import { useTheme } from "@mui/material";
+import { 
+  useTheme,
+  Button,
+  Box,
+ } from "@mui/material";
 import { useDeleteFundingInstrumentMutation, useDeleteFundingRoundMutation, useDeleteFundingTypeMutation } from "state/api";
+import { useNavigate } from "react-router-dom";
 
 const FundingGrid = ({ data, type }) => {
   const theme = useTheme();
+  const navigate = useNavigate();
 
   const [deleteFundingTpes, {isLoading: isDeletingFundingTpes }] = useDeleteFundingTypeMutation();
   const [deleteFundingInstrument , {isLoading: isDeletingFundingInstruments}] = useDeleteFundingInstrumentMutation();
+  const [deleteFundingRound , {isLoading: isDeletingFundingRounds}] = useDeleteFundingRoundMutation();
 
   const columns = [
     { field: "name", headerName: "Name", width: 200 },
@@ -18,24 +25,47 @@ const FundingGrid = ({ data, type }) => {
       sortable: false,
       width: 150,
       renderCell: (params) => (
-        <div>
-          <button onClick={() => handleEdit(params.id)}>Edit</button>
-          <button onClick={() => handleDelete(params.id)}>Delete</button>
-        </div>
-      ),
+              <Box display="flex" marginTop={1.5} gap={1}>
+                <Button
+                  variant="contained"
+                  size="small"
+                  onClick={() => handleEdit(params.id)}
+                >
+                  Edit
+                </Button>
+                <Button
+                  variant="contained"
+                  color="error"
+                  size="small"
+                  onClick={() => handleDelete(params.id)}
+                >
+                  Delete
+                </Button>
+              </Box>
+            ),
     },
   ];
 
   const handleEdit = (id) => {
-    console.log(`${type} Edit ID:`, id);
+     
+     navigate(`/fundings/update/${type}/${id}`); // Navigate to the edit page
   };
 
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this item?")) {
+       
       try {
-        await fetch(`/api/v1/funding/${type}/${id}`, { method: "DELETE" });
+        if (type === "FundingType") {
+          await deleteFundingTpes(id).unwrap();
+        } else if (type === "FundingInstrument") {
+          await deleteFundingInstrument(id).unwrap();
+        } else if (type === "FundingRound") {
+          await deleteFundingRound(id).unwrap();
+        }
+        alert(`${type} deleted successfully`);
       } catch (error) {
-        console.error("Error deleting item:", error);
+        alert(`Failed to delete ${type}.`, error.message);
+        
       }
     }
   };

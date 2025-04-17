@@ -37,11 +37,11 @@ const FundingOverview = () => {
           <Typography variant="h6" gutterBottom>
             Funding Instruments
           </Typography>
-          <Button variant="contained" color="primary" onClick={() => handleCreate("instruments")}>
+          <Button variant="contained" color="primary" onClick={() => handleCreate("FundingInstrument")}>
             Create Instrument
           </Button>
         </Box>
-        <FundingGrid data={fundingInstruments} type="instruments" />
+        <FundingGrid data={fundingInstruments} type="FundingInstrument" />
       </Box>
 
       {/* Funding Types */}
@@ -50,11 +50,11 @@ const FundingOverview = () => {
           <Typography variant="h6" gutterBottom>
             Funding Types
           </Typography>
-          <Button variant="contained" color="primary" onClick={() => handleCreate("types")}>
+          <Button variant="contained" color="primary" onClick={() => handleCreate("FundingType")}>
             Create Type
           </Button>
         </Box>
-        <FundingGrid data={fundingTypes} type="types" />
+        <FundingGrid data={fundingTypes} type="FundingType" />
       </Box>
 
       {/* Funding Rounds */}
@@ -63,11 +63,11 @@ const FundingOverview = () => {
           <Typography variant="h6" gutterBottom>
             Funding Rounds
           </Typography>
-          <Button variant="contained" color="primary" onClick={() => handleCreate("rounds")}>
+          <Button variant="contained" color="primary" onClick={() => handleCreate("FundingRound")}>
             Create Round
           </Button>
         </Box>
-        <FundingGrid data={fundingRoundings?.fundingRounds || []} type="rounds" />
+        <FundingGrid data={fundingRoundings?.fundingRounds || []} type="FundingRound" />
       </Box>
     </>
   );

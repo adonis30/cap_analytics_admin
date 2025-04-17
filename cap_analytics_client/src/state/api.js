@@ -124,10 +124,10 @@ export const api = createApi({
       invalidatesTags: ['FundingInstrument'],
     }),
     updateFundingInstrument: build.mutation({
-      query: ({ id, ...updatedData }) => ({
+      query: ({ id, ...data }) => ({
         url: `${url}fundings/fundingInstruments/${id}`,
         method: 'PUT',
-        body: updatedData,
+        body: data,
       }),
       invalidatesTags: (result, error, { id }) => [{ type: 'FundingInstrument', id }],
     }),
@@ -157,10 +157,10 @@ export const api = createApi({
       invalidatesTags: ['FundingRound'],
     }),
     updateFundingRound: build.mutation({
-      query: ({ id, ...updatedData }) => ({
+      query: ({ id, ...data }) => ({
         url: `${url}fundings/fundingRounds/${id}`,
         method: 'PUT',
-        body: updatedData,
+        body: data,
       }),
       invalidatesTags: (result, error, { id }) => [{ type: 'FundingRound', id }],
     }),
@@ -190,10 +190,10 @@ export const api = createApi({
       invalidatesTags: ['FundingType'],
     }),
     updateFundingType: build.mutation({
-      query: ({ id, ...updatedData }) => ({
+      query: ({ id, ...data }) => ({
         url: `${url}fundings/fundingTypes/${id}`,
         method: 'PUT',
-        body: updatedData,
+        body: data,
       }),
       invalidatesTags: (result, error, { id }) => [{ type: 'FundingType', id }],
     }),
