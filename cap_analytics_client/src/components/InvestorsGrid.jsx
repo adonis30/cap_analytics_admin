@@ -1,13 +1,45 @@
 import React from "react";
 import { DataGrid } from "@mui/x-data-grid";
-import { useGetInvestorsQuery } from "state/api";
-import { useTheme } from "@mui/material";
+import { useNavigate } from "react-router-dom";
+import { 
+  useGetInvestorsQuery,
+  useUpdateInvestorMutation,
+  useDeleteInvestorMutation 
+} from "state/api";
+import {
+  useTheme,
+  Button,
+  Box,
+  CircularProgress,
+  Typography,
+} from "@mui/material";
 
 const InvestorsGrid = () => {
   const theme = useTheme();
+  const navigate = useNavigate();
   // Fetch investors data using RTK Query
   const { data: investors = [], isLoading, error } = useGetInvestorsQuery();
+
+  const [ deleteInvestor, { isLoading: isDeleting } ] = useDeleteInvestorMutation();
    
+
+  const handleEdit = (id) => {
+    // Navigate to the edit page for the selected investor
+    navigate(`/investors/update/${id}`); // Navigate to the edit page
+  } ;
+
+  const handleDelete = async (id) => {
+    if (window.confirm("Are you sure you want to delete this investor?")) {
+      try {
+        await deleteInvestor(id).unwrap(); // Use RTK Query to delete the investor
+        alert("Investor deleted successfully");
+      } catch (error) {
+        
+        alert("Failed to delete the investor.", error.message);
+      }
+    }
+  }
+
   const columns = [
     { field: "name", headerName: "Investor Name", width: 200 },
     { field: "type", headerName: "Type", width: 150 },
@@ -22,27 +54,35 @@ const InvestorsGrid = () => {
       sortable: false,
       width: 150,
       renderCell: (params) => (
-        <div>
-          <button onClick={() => handleEdit(params.id)}>Edit</button>
-          <button onClick={() => handleDelete(params.id)}>Delete</button>
-        </div>
+        <Box display="flex" gap={1}>
+          <Button
+            variant="contained"
+            size="small"
+            onClick={() => handleEdit(params.id)}
+          >
+            Edit
+          </Button>
+          <Button
+            variant="contained"
+            color="error"
+            size="small"
+            onClick={() => handleDelete(params.id)}
+          >
+            Delete
+          </Button>
+        </Box>
       ),
     },
   ];
 
-  const handleEdit = (id) => {
-    console.log("Edit investor ID:", id);
-  };
+  // Check if data is loading or if there's an error
+  if (isLoading) {
+    return <CircularProgress />;
+  }
+  if (error) {
+    return <Typography color="error">Error loading data: {error.message}</Typography>;
+  }
 
-  const handleDelete = async (id) => {
-    if (window.confirm("Are you sure you want to delete this investor?")) {
-      try {
-        await fetch(`/api/investors/${id}`, { method: "DELETE" });
-      } catch (error) {
-        console.error("Error deleting investor:", error);
-      }
-    }
-  };
 
   return (
     <div style={{ height: "100vh", width: "100%" }}>
@@ -53,7 +93,9 @@ const InvestorsGrid = () => {
           id: investor._id,
           name: investor.name,
           type: investor.type,
-          description: investor.individualDetails?.bio || investor.institutionDetails?.description,
+          description:
+            investor.individualDetails?.bio ||
+            investor.institutionDetails?.description,
           email: investor.email,
           phoneNumber: investor.phoneNumber,
           totalAmountFunded: investor.totalAmountFunded,

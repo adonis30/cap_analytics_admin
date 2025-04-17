@@ -9,7 +9,7 @@ const Investors = () => {
   const theme = useTheme();
   const navigate = useNavigate();
   const { data, isLoading } = useGetInvestorsQuery();
-  console.log(data);
+  
   if (isLoading) {
     return <div>Loading...</div>; 
   }
@@ -22,7 +22,7 @@ const Investors = () => {
         <Button 
           variant="contained" 
           color="primary" 
-          onClick={() => navigate('/investors/new')}
+          onClick={() => navigate('/investors/create')}
         >
           Create New Investor
         </Button>

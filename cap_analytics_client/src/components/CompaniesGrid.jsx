@@ -16,7 +16,7 @@ const CompaniesGrid = () => {
   const [updateCompany] = useUpdateCompanyMutation(); 
 
   const handleEdit = (id) => {
-    console.log("Editing company ID:", id);
+    
     navigate(`/companies/update/${id}`); 
   };
 
@@ -24,7 +24,7 @@ const CompaniesGrid = () => {
     if (window.confirm("Are you sure you want to delete this company?")) {
       try {
         await deleteCompany(id).unwrap();
-        console.log("Company deleted successfully");
+        alert("Company deleted successfully");
       } catch (error) {
         console.error("Error deleting company:", error);
         alert("Failed to delete the company.");

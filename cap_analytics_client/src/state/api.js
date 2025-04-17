@@ -210,12 +210,12 @@ export const api = createApi({
       providesTags: ['Investor'],
     }),
     getInvestorById: build.query({
-      query: (id) => `${url}investor/${id}`,
+      query: (id) => `${url}investors/${id}`,
       providesTags: (result, error, id) => [{ type: 'Investor', id }],
     }),
     createInvestor: build.mutation({
       query: (newInvestor) => ({
-        url: `${url}investor/`,
+        url: `${url}investors/`,
         method: 'POST',
         body: newInvestor,
       }),
@@ -223,7 +223,7 @@ export const api = createApi({
     }),
     updateInvestor: build.mutation({
       query: ({ id, ...updatedData }) => ({
-        url: `${url}investor/${id}`,
+        url: `${url}investors/${id}`,
         method: 'PUT',
         body: updatedData,
       }),
@@ -231,7 +231,7 @@ export const api = createApi({
     }),
     deleteInvestor: build.mutation({
       query: (id) => ({
-        url: `${url}investor/${id}`,
+        url: `${url}investors/${id}`,
         method: 'DELETE',
       }),
       invalidatesTags: ['Investor'],

@@ -24,6 +24,9 @@ import { useAuthStore } from "./store/authStore";
 import { Toaster } from "react-hot-toast";
 import LoadingSpinner from "components/LoadingSpinner";
 import EditCompany from "scenes/companies/[id]/update";
+import CreateInvestorForm from "components/CreateInvestorForm";
+import CreateInvestorPage from "scenes/investors/create";
+import EditInvestor from "scenes/investors/[id]/update";
 
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated } = useAuthStore();
@@ -58,6 +61,8 @@ function App() {
   if (isCheckingAuth) {
     return <LoadingSpinner />;
   }
+
+  
 
   return (
     <div className="app">
@@ -102,10 +107,10 @@ function App() {
               <Route path="/companies/create" element={<CompanyForm />} />
               <Route path="/companies/update/:id" element={<EditCompany />} />
               <Route path="/investors" element={<Investors />} />
-              <Route path="/investors/create" element={<CompanyForm />} />
-              <Route path="/investors/update/:id" element={<EditCompany />} />
+              <Route path="/investors/create" element={<CreateInvestorPage />} />
+              <Route path="/investors/update/:id" element={<EditInvestor />} />
               <Route path="/fundings" element={<FundingOverview />} />
-              
+
               <Route
                 path="/fundings/create/instruments"
                 element={<CreateInstrument />}
