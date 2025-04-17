@@ -32,22 +32,24 @@ export const getAllFundingInstruments = async (req, res) => {
   }
 
   export const updateFundingInstrument = async (req, res) => {
-      
     const { id } = req.params;
-
+    const { data } = req.body;  
+    
     try {
       const updatedFundingInstrument = await FundingInstruments.findByIdAndUpdate(
         id,
-            { $set: req.body },
-            { new: true, runValidators: true } // Return updated document and validate inputs
-      )
+        { $set: data },
+        { new: true, runValidators: true }
+      );
+  
       if (!updatedFundingInstrument) {
-        return res.status(404).json({ message: " no founding Instrument found" });
-    }
-
-    res.status(200).json(updatedFundingInstrument);
+        return res.status(404).json({ message: "No funding instrument found" });
+      }
+  
+      res.status(200).json(updatedFundingInstrument);
+       
     } catch (error) {
-      res.status(400).json({ message: error.message});
+      res.status(400).json({ message: error.message });
     }
   };
 
@@ -113,45 +115,41 @@ export const getAllFundingInstruments = async (req, res) => {
   }
 
   export const getFundingRoundById = async (req, res) => {
-
     try {
-      const { id } = res.params;
-
-      const fundingRound = await Fundingrounds.findById(id)
+      const { id } = req.params;
+      const fundingRound = await Fundingrounds.findById(id);
       if (!fundingRound) {
-        return res.status(404).json({ message: " no founding round found" });
+        return res.status(404).json({ message: "No funding round found" });
       }
-      res.status(200).json({fundingRound})
-      
+      res.status(200).json(fundingRound);
     } catch (error) {
       res.status(400).json({ message: error.message });
     }
-  }
+  };
 
   export const updateFundingRound = async (req, res) => {
-    
-    const { id } = res.params;
-
-
+    const { id } = req.params;
+    const { data } = req.body;  
+     
     try {
-      const updateFundingRound = await Fundingrounds.findByIdAndUpdate(
+      const updatedFundingRound = await Fundingrounds.findByIdAndUpdate(
         id,
-        { $set: req.body },
-        { new: true, runValidators: true } // Return updated document and validate inputs
-  
-      )
-      if (!updateFundingRound) {
-        return res.status(404).json({ message: " no founding round found" });
-    }
-
-    res.status(200).json(updateFundingRound);
+        { $set: data },
+        { new: true, runValidators: true }
+      );
+      if (!updatedFundingRound) {
+        return res.status(404).json({ message: "No funding round found" });
+      }
+      res.status(200).json(updatedFundingRound);
+       
     } catch (error) {
-      res.status(400).json({message: error.message});
+      res.status(400).json({ message: error.message });
     }
-  }
+  };
+
 
   export const deleteFundingRound = async (req, res) => {
-    const { id } = res.params;
+    const { id } = req.params;
 
    try {
     const deleteFundingRound = await Fundingrounds.findByIdAndDelete(id);
@@ -186,7 +184,7 @@ export const getAllFundingInstruments = async (req, res) => {
   export const getFundingTypeById = async (req, res) => {
 
     try {
-      const { id } = res.params;
+      const { id } = req.params;
 
       const fundingType = await FundingType.findById(id)
       if (!fundingType) {
@@ -216,13 +214,14 @@ export const getAllFundingInstruments = async (req, res) => {
 
   export const updateFundingType = async (req, res) => {
     
-    const { id } = res.params;
+    const { id } = req.params;
+    const { data } = req.body; 
 
 
     try {
       const updateFundingType = await FundingType.findByIdAndUpdate(
         id,
-        { $set: req.body },
+        { $set: data },
         { new: true, runValidators: true } // Return updated document and validate inputs
   
       )
@@ -231,13 +230,14 @@ export const getAllFundingInstruments = async (req, res) => {
     }
 
     res.status(200).json(updateFundingType);
+    
     } catch (error) {
       res.status(400).json({message: error.message});
     }
   }
 
   export const deleteFundingType = async (req, res) => {
-    const { id } = res.params;
+    const { id } = req.params;
 
    try {
     const deleteFundingType = await FundingType.findByIdAndDelete(id);
