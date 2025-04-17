@@ -103,11 +103,11 @@ export const createCompany = async (req, res) => {
 
 // Update an existing company
 export const updateCompany = async (req, res) => {
-    const { id } = req.params;
-
+    const { companyId } = req.params;
+    
     try {
         const updatedCompany = await Company.findByIdAndUpdate(
-            id,
+            companyId,
             { $set: req.body },
             { new: true, runValidators: true }
         );

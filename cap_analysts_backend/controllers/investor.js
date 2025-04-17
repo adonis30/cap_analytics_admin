@@ -1,5 +1,8 @@
 import { Investor, IndividualInvestor, InstitutionInvestor } from "../models/Investors.js";
-
+import FundingType from "../models/FundingTypes.js";
+import FundingRound from "../models/FundingRounds.js";
+import FundingInstrument from "../models/FundingInstruments.js";
+import Company from "../models/Companies.js";
 /**
  * Get all investors
  */
@@ -32,15 +35,18 @@ export const getAllInvestors = async (req, res) => {
  */
 export const getInvestorById = async (req, res) => {
   const { id } = req.params;
+
   try {
-    let investor = await IndividualInvestor.findById(id).populate("fundingTypes fundedCompaniesIds");
+    const investor = await Investor.findById(id)
+      
+
     if (!investor) {
-      investor = await InstitutionInvestor.findById(id).populate("fundingTypes fundedCompaniesIds");
+      return res.status(404).json({ message: "Investor not found" });
     }
-    if (!investor) return res.status(404).json({ message: "Investor not found" });
 
     res.status(200).json(investor);
   } catch (error) {
+    console.error("Error fetching investor by ID:", error.message);
     res.status(500).json({ message: error.message });
   }
 };
@@ -50,6 +56,8 @@ export const getInvestorById = async (req, res) => {
  */
 export const createInvestor = async (req, res) => {
   const { type, ...rest } = req.body;
+
+  
 
   try {
     let newInvestor;
@@ -64,6 +72,7 @@ export const createInvestor = async (req, res) => {
     await newInvestor.save();
     res.status(201).json(newInvestor);
   } catch (error) {
+     
     res.status(500).json({ message: error.message });
   }
 };
@@ -73,18 +82,25 @@ export const createInvestor = async (req, res) => {
  */
 export const updateInvestor = async (req, res) => {
   const { id } = req.params;
-  const updates = req.body;
+  const { data } = req.body;
+
+   
 
   try {
-    let updatedInvestor = await IndividualInvestor.findByIdAndUpdate(id, updates, { new: true }).populate("fundingTypes fundedCompaniesIds");
-    if (!updatedInvestor) {
-      updatedInvestor = await InstitutionInvestor.findByIdAndUpdate(id, updates, { new: true }).populate("fundingTypes fundedCompaniesIds");
+    const investor = await Investor.findById(id);
+    if (!investor) {
+      return res.status(404).json({ message: "Investor not found" });
     }
-    if (!updatedInvestor) return res.status(404).json({ message: "Investor not found" });
 
-    res.status(200).json(updatedInvestor);
+    Object.assign(investor, data); // not req.body
+
+    await investor.save();
+
+    
+    res.status(200).json(investor);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error("Error updating investor:", error.message);
+     
   }
 };
 

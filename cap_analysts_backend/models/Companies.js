@@ -9,7 +9,7 @@ const CompanySchema = new Schema(
     industries: [{ type: String, trim: true }], // Now an array
     owners: { type: String, trim: true }, // Array of user references
     rankCompany: { type: Number, default: 0 }, // Changed to Number
-    operatingStatus: { type: String, enum: ["Active", "Inactive", "Closed"], default: "Active" },
+    operatingStatus: { type: String, enum: ["Active", "Inactive", "Closed"], default: "Inactive" },
     contactNumber: { type: String, trim: true },
     contactEmail: { type: String, trim: true, lowercase: true },
     numberOfSubOrgs: { type: Number, default: 0 },
