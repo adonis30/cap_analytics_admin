@@ -97,7 +97,7 @@ const FundingForm = ({
                 <TableRow>
                   <TableCell>Name</TableCell>
                   <TableCell>Description</TableCell>
-                  <TableCell>Actions</TableCell>
+                 {/*  <TableCell>Actions</TableCell> */}
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -106,13 +106,13 @@ const FundingForm = ({
                     <TableCell>{item.name}</TableCell>
                     <TableCell>{item.description}</TableCell>
                     <TableCell>
-                      <Button
+                      {/* <Button
                         variant="outlined"
                         color="primary"
                         onClick={() => navigate(`/funding/edit/${item._id || item.id}`)}
                       >
                         Edit
-                      </Button>
+                      </Button> */}
                     </TableCell>
                   </TableRow>
                 ))}
@@ -168,7 +168,7 @@ export const CreateRound = () => {
     <FundingForm
       title="Create Funding Round"
       apiFn={createFundingRound}
-      tableData={fundingRounds}
+      tableData={fundingRounds?.fundingRounds || []}
     />
   );
 };

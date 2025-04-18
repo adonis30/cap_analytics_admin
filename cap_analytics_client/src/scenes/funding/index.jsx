@@ -37,7 +37,7 @@ const FundingOverview = () => {
           <Typography variant="h6" gutterBottom>
             Funding Instruments
           </Typography>
-          <Button variant="contained" color="primary" onClick={() => handleCreate("FundingInstrument")}>
+          <Button variant="contained" color="primary" onClick={() => handleCreate("instruments")}>
             Create Instrument
           </Button>
         </Box>
