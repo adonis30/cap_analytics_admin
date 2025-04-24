@@ -29,6 +29,7 @@ import LoadingSpinner from "components/LoadingSpinner";
 import EditCompany from "scenes/companies/[id]/update";
 import CreateInvestorPage from "scenes/investors/create";
 import EditInvestor from "scenes/investors/[id]/update";
+import SdgFocusOverview from "scenes/sdgfocus";
 
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated } = useAuthStore();
@@ -54,7 +55,7 @@ function App() {
   const mode = useSelector((state) => state.global?.mode || "light");
   const theme = useMemo(() => createTheme(themeSettings(mode)), [mode]);
 
-  const { checkAuth, isCheckingAuth, error } = useAuthStore();
+  const { checkAuth, isCheckingAuth } = useAuthStore();
 
   useEffect(() => {
     checkAuth();
@@ -112,6 +113,7 @@ function App() {
               <Route path="/investors/create" element={<CreateInvestorPage />} />
               <Route path="/investors/update/:id" element={<EditInvestor />} />
               <Route path="/fundings" element={<FundingOverview />} />
+              <Route path="/SDG" element={<SdgFocusOverview />} />
 
               <Route
                 path="/fundings/create/FundingInstrument"element={<CreateInstrument />}

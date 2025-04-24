@@ -172,6 +172,42 @@ export const api = createApi({
       invalidatesTags: ['FundingRound'],
     }),
 
+    // CRUD SDG Focus Areas
+    getsdgFocus: build.query({
+      query: () => `${url}sdgFocus`,
+      providesTags: ['sdgFocus'],
+    }),
+
+    getsdgFocusById: build.query({
+      query: (id) => `${url}sdgFocus/${id}`,
+      providesTags: (result, error, id) => [{ type: 'sdgFocus', id }],
+    }),
+    createsdgFocus: build.mutation({
+      query: (newFocus) => ({
+        url: `${url}sdgFocus`,
+        method: 'POST',
+        body: newFocus,
+      }),
+      invalidatesTags: ['sdgFocus'],
+    }),
+    updatesdgFocus: build.mutation({
+      query: ({ id, ...data }) => ({
+        url: `${url}sdgFocus/${id}`,
+        method: 'PUT',
+        body: data,
+      }),
+      invalidatesTags: (result, error, { id }) => [{ type: 'sdgFocus', id }],
+    }),
+    deletesdgFocus: build.mutation({
+      query: (id) => ({
+        url: `${url}sdgFocus/${id}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ['sdgFocus'],
+    }),
+
+
+
     // CRUD for Funding Types
     getFundingTypes: build.query({
       query: () => `${url}fundings/fundingTypes`,
@@ -357,5 +393,10 @@ export const {
   useCreateCategoryMutation,
   useUpdateCategoryMutation,
   useDeleteCategoryMutation,
+  useGetsdgFocusByIdQuery,
+  useGetsdgFocusQuery,
+  useCreatesdgFocusMutation,
+  useUpdatesdgFocusMutation,
+  useDeletesdgFocusMutation,
   useInitiateUploadMutation,
 } = api;

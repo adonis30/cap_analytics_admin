@@ -33,6 +33,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import FlexBetween from "./FlexBetween";
 import profileImage from "assets/profile.jpeg";
 import { useAuthStore } from "store/authStore";
+ 
 const navItems = [
   {
     text: "Dashboard",
@@ -57,6 +58,10 @@ const navItems = [
   {
     text: "Fundings",
     icon: <PublicOutlined />,
+  },
+  {
+    text: "SDG",
+    icon: <PointOfSaleOutlined />,
   },
   {
     text: "Deals",
@@ -102,7 +107,7 @@ const Sidebar = ({
   const [active, setActive] = useState("");
   const navigate = useNavigate();
   const theme = useTheme();
-  const { user, logout } = useAuthStore();
+  const { user } = useAuthStore();
 
   useEffect(() => {
     setActive(pathname.substring(1));
@@ -161,6 +166,7 @@ const Sidebar = ({
                 <ListItemButton
                   onClick={() => {
                     navigate(`/${lcText}`);
+                    console.log(navigate(`/${lcText}`));
                     setActive(lcText);
                   }}
                   sx={{
@@ -210,15 +216,15 @@ const Sidebar = ({
          />
 
              <Box textAlign='left'>
-                <Typography fontWeight="bold" fontSize="0.9rem" sx={{ color: theme.palette.secondary[100] }}>
+                <Typography fontWeight="bold" fontSize="0.7rem" sx={{ color: theme.palette.secondary[100] }}>
                     {user.firstName + ' ' + user.lastName}
                 </Typography>
-                <Typography  fontSize="0.8rem" sx={{ color: theme.palette.secondary[200] }}>
+                <Typography  fontSize="0.7rem" sx={{ color: theme.palette.secondary[200] }}>
                     {user.role}
                 </Typography>
              </Box>
              <SettingsOutlined 
-             sx={{ color: theme.palette.secondary[300], fontSize: '25px' }}
+             sx={{ color: theme.palette.secondary[300], fontSize: '22px' }}
              />
             
         </FlexBetween>

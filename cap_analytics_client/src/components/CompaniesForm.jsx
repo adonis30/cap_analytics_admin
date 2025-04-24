@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo, useCallback } from "react";
+import { useState, useEffect, useRef, useMemo, useCallback, use } from "react";
 import { useForm, Controller, useWatch } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
@@ -35,6 +35,7 @@ import {
   useCreateFundingInstrumentMutation,
   useInitiateUploadMutation,
   useGetCompanyByIdQuery,
+  useGetsdgFocusQuery,
 } from "state/api";
 import { useNavigate } from "react-router-dom";
 import MultiSelectDropdown from "./MultiSelectDropdown";
@@ -43,39 +44,41 @@ import MultiSelectDropdown from "./MultiSelectDropdown";
 const schema = yup.object().shape({
   organizationName: yup.string().required("Company name is required"),
   description: yup.string().required("Description is required"),
-  industries: yup
-    .array()
-    .of(yup.string())
-    .required("Industry type is required"),
-  categories: yup
-    .array()
-    .of(yup.string())
-    .required("At least one category is required"),
-  fundingTypes: yup
-    .array()
-    .of(yup.string())
-    .required("At least one funding type is required"),
-  fundingRounds: yup
-    .array()
-    .of(yup.string())
-    .required("At least one funding round is required"),
-  fundingInstruments: yup
-    .array()
-    .of(yup.string())
-    .required("At least one funding instrument is required"),
+  industries: yup.array().of(yup.string()).required(),
+  categories: yup.array().of(yup.string()).required(),
+  fundingTypes: yup.array().of(yup.string()).required(),
+  fundingRounds: yup.array().of(yup.string()).required(),
+  fundingInstruments: yup.array().of(yup.string()).required(),
   contactNumber: yup.string(),
   contactEmail: yup.string().email("Invalid email format"),
   imageUrl: yup.string().nullable(),
-
   operatingStatus: yup
     .string()
     .oneOf(["Active", "Inactive", "Closed"])
     .default("Active"),
   location: yup.string().required("Company location is required"),
-  fundedDate: yup.date().nullable().required("Funded Date is required"), // ✅ Date validation
+  fundedDate: yup.date().nullable().required("Funded Date is required"),
   owners: yup.string().required("Owners are required"),
   url: yup.string().url("Must be a valid URL"),
+
+  // ✨ New fields
+  investmentAsk: yup.string().nullable(),
+  sdgFocus: yup.array().of(yup.string()).nullable(),
+  businessGrowthStage: yup
+    .string()
+    .oneOf(["Idea", "Seed", "Early", "Growth", "Expansion", "Mature"])
+    .nullable(),
+  yearsInOperation: yup.number().nullable(),
+  annualExpenditure: yup.number().nullable(),
+  annualRevenue: yup.number().nullable(),
 });
+
+const investorAsk = [
+  { value: "0 - 50000", label: "<=50000" },
+  { value: "50000 - 100000", label: "50000 <= 100000" },
+  { value: "100000 - 500000", label: "100000 <=500000" },
+  { value: ">500000", label: ">500000" },
+];
 
 const CompaniesForm = ({ company, companyId }) => {
   const {
@@ -96,6 +99,9 @@ const CompaniesForm = ({ company, companyId }) => {
 
   const { data: fundingInstrumentsData, isLoading: fundingInstrumentsLoading } =
     useGetFundingInstrumentsQuery();
+
+  const { data: sdgFocusData, isLoading: sdgFocusLoading } =
+    useGetsdgFocusQuery();
 
   const [initiateUpload] = useInitiateUploadMutation();
 
@@ -129,6 +135,12 @@ const CompaniesForm = ({ company, companyId }) => {
     operatingStatus: company?.operatingStatus || "Active",
     owners: company?.owners || "",
     url: company?.url || "",
+    investmentAsk: company?.investmentAsk || "",
+    sdgFocus: company?.sdgFocus || [],
+    businessGrowthStage: company?.businessGrowthStage || "",
+    yearsInOperation: company?.yearsInOperation || null,
+    annualExpenditure: company?.annualExpenditure || null,
+    annualRevenue: company?.annualRevenue || null,
   };
 
   const {
@@ -165,6 +177,14 @@ const CompaniesForm = ({ company, companyId }) => {
         fundingInstruments,
         owners,
         operatingStatus,
+        sdgFocus,
+        industries,
+        investmentAsk,
+        businessGrowthStage,
+        yearsInOperation,
+        annualExpenditure,
+        annualRevenue,
+
       } = company1;
 
       reset({
@@ -183,13 +203,24 @@ const CompaniesForm = ({ company, companyId }) => {
         categories: (categories ?? []).map((c) =>
           typeof c === "string" ? c : c._id
         ),
+
         fundingRounds: fundingRounds ?? [],
         fundingTypes: (fundingTypes ?? []).map((ft) =>
           typeof ft === "string" ? ft : ft._id
         ),
+        sdgFocus: (sdgFocus ?? []).map((s) =>
+          typeof s === "string" ? s : s._id
+        ),
+        investmentAsk: investmentAsk ?? "",
+        yearsInOperation: yearsInOperation ?? null,
+        annualExpenditure: annualExpenditure ?? null,
+        annualRevenue: annualRevenue ?? null,
+        fundedDate: fundedDate ? dayjs(fundedDate) : null,
+        businessGrowthStage: businessGrowthStage ?? "",
+
         fundingInstruments: fundingInstruments ?? [],
       });
-       
+
       // Also show image preview if available
       if (imageUrl) {
         setPreviewUrl(imageUrl);
@@ -206,6 +237,7 @@ const CompaniesForm = ({ company, companyId }) => {
   const selectedIndustries = watch("industries");
   const selectedFundingRounds = watch("fundingRounds");
   const selectedFundingInstruments = watch("fundingInstruments");
+  const selectedSDGFocus = watch("sdgFocus");
 
   // ✅ Handle Adding New Values Dynamically
   const handleAddOption = async (createFn, inputValue, optionType) => {
@@ -234,6 +266,14 @@ const CompaniesForm = ({ company, companyId }) => {
       ? categoriesData.categories.map((c) => ({
           value: c._id,
           label: c.name,
+        }))
+      : [];
+
+  const sdgFocusOptions =
+    Array.isArray(sdgFocusData?.sdgFocus) && sdgFocusData.sdgFocus.length > 0
+      ? sdgFocusData.sdgFocus.map((s) => ({
+          value: s._id,
+          label: s.name,
         }))
       : [];
 
@@ -290,7 +330,6 @@ const CompaniesForm = ({ company, companyId }) => {
   // Watch selected categories and update industries in the background
   useEffect(() => {
     setValue("industries", selectedCategories); // Sync selectedCategories to industries without rendering
-     
   }, [selectedCategories, setValue]);
 
   const handleImageChange = (event) => {
@@ -311,10 +350,10 @@ const CompaniesForm = ({ company, companyId }) => {
     }
   };
 
-   
   const onSubmit = async (values) => {
+    
     setIsSubmitting(true);
-  
+
     try {
       // ✅ CASE: New image is selected
       if (selectedFile) {
@@ -323,16 +362,18 @@ const CompaniesForm = ({ company, companyId }) => {
           setIsSubmitting(false);
           return;
         }
-  
+
         if (!SUPPORTED_FORMATS.includes(selectedFile.type)) {
-          toast.error("Unsupported file format. Please upload JPG, JPEG, or PNG.");
+          toast.error(
+            "Unsupported file format. Please upload JPG, JPEG, or PNG."
+          );
           setIsSubmitting(false);
           return;
         }
-  
+
         const formData = new FormData();
         formData.append("imageUrl", selectedFile);
-  
+
         const uploadResponse = await initiateUpload(formData).unwrap();
         if (uploadResponse?.url) {
           values.imageUrl = uploadResponse.url;
@@ -349,25 +390,25 @@ const CompaniesForm = ({ company, companyId }) => {
         }
         values.imageUrl = currentImage;
       }
-  
+
       // ✅ Create or Update company
       if (formMode === "create") {
         const response = await createCompany({ company: values }).unwrap();
-         
+
         toast.success("Company created successfully!");
       } else {
         if (!companyId) {
           toast.error("Missing company ID for update");
           return;
         }
-  
+
         const response = await updateCompany({
           companyId,
           company: values,
         }).unwrap();
         toast.success("Company updated successfully!");
       }
-  
+
       navigate("/companies");
     } catch (error) {
       toast.error("Failed to create/update company");
@@ -382,7 +423,7 @@ const CompaniesForm = ({ company, companyId }) => {
       setIsSubmitting(false);
     }
   };
-  
+
   if (
     fundingRoundsLoading ||
     fundingTypesLoading ||
@@ -496,6 +537,101 @@ const CompaniesForm = ({ company, companyId }) => {
                   />
                 </Card>
               )}
+            </Grid>
+            {/* Investment Ask */}
+            <Grid item xs={12} md={4}>
+              <TextField
+                select
+                fullWidth
+                label="Investment Ask"
+                {...register("investmentAsk")}
+                value={watch("investmentAsk") || ""} // guard against undefined
+                error={!!errors.investmentAsk}
+                helperText={errors.investmentAsk?.message}
+              >
+                {[
+                  { value: "0 - 50000", label: "≤ 50 000" },
+                  { value: "50000 - 100000", label: "50 000–100 000" },
+                  { value: "100000 - 500000", label: "100 000–500 000" },
+                  { value: ">500000", label: "> 500 000" },
+                ].map(({ value, label }) => (
+                  <MenuItem key={value} value={value}>
+                    {label}
+                  </MenuItem>
+                ))}
+              </TextField>
+            </Grid>
+
+            {/* Business Growth Stage */}
+            <Grid item xs={12} md={4}>
+              <TextField
+                select
+                fullWidth
+                label="Growth Stage"
+                {...register("businessGrowthStage")}
+                value={watch("businessGrowthStage") || ""} // guard against undefined
+                error={!!errors.businessGrowthStage}
+                helperText={errors.businessGrowthStage?.message}
+              >
+                {["Idea", "Seed", "Early", "Growth", "Expansion", "Mature"].map(
+                  (stage) => (
+                    <MenuItem key={stage} value={stage}>
+                      {stage}
+                    </MenuItem>
+                  )
+                )}
+              </TextField>
+            </Grid>
+
+            {/* SDG Focus */}
+            <Grid item xs={12} md={4}>
+              <MultiSelectDropdown
+                options={[
+                  ...(sdgFocusData?.map((s) => ({
+                    value: s._id,
+                    label: s.name,
+                  })) ?? []),
+                ]}
+                defaultValue={watch("sdgFocus") || []}
+                onChange={(values) => handleDropdownChange(values, "sdgFocus")}
+                placeholder="Select SDG Focus Areas"
+              />
+            </Grid>
+
+            {/* Years in Operation */}
+            <Grid item xs={12} md={4}>
+              <TextField
+                type="number"
+                fullWidth
+                label="Years in Operation"
+                {...register("yearsInOperation")}
+                error={!!errors.yearsInOperation}
+                helperText={errors.yearsInOperation?.message}
+              />
+            </Grid>
+
+            {/* Annual Expenditure */}
+            <Grid item xs={12} md={4}>
+              <TextField
+                type="number"
+                fullWidth
+                label="Annual Expenditure (USD)"
+                {...register("annualExpenditure")}
+                error={!!errors.annualExpenditure}
+                helperText={errors.annualExpenditure?.message}
+              />
+            </Grid>
+
+            {/* Annual Revenue */}
+            <Grid item xs={12} md={4}>
+              <TextField
+                type="number"
+                fullWidth
+                label="Annual Revenue (USD)"
+                {...register("annualRevenue")}
+                error={!!errors.annualRevenue}
+                helperText={errors.annualRevenue?.message}
+              />
             </Grid>
             <Grid item xs={12} md={4}>
               <TextField
