@@ -9,7 +9,11 @@ const CompanySchema = new Schema(
     industries: [{ type: String, trim: true }], // Now an array
     owners: { type: String, trim: true }, // Array of user references
     rankCompany: { type: Number, default: 0 }, // Changed to Number
-    operatingStatus: { type: String, enum: ["Active", "Inactive", "Closed"], default: "Inactive" },
+    operatingStatus: {
+      type: String,
+      enum: ["Active", "Inactive", "Closed"],
+      default: "Inactive",
+    },
     contactNumber: { type: String, trim: true },
     contactEmail: { type: String, trim: true, lowercase: true },
     numberOfSubOrgs: { type: Number, default: 0 },
@@ -22,16 +26,33 @@ const CompanySchema = new Schema(
     fundedBy: [{ type: Schema.Types.ObjectId, ref: "Investor" }], // Changed to Investor
     fundingTypes: [{ type: Schema.Types.ObjectId, ref: "FundingType" }], // Array of funding type IDs
     fundingRounds: [{ type: Schema.Types.ObjectId, ref: "FundingRound" }], // Array of funding round IDs
-    fundingInstruments: [{ type: Schema.Types.ObjectId, ref: "FundingInstrument" }], // Array of funding instrument IDs
+    fundingInstruments: [
+      { type: Schema.Types.ObjectId, ref: "FundingInstrument" },
+    ], // Array of funding instrument IDs
     companyCreator: { type: Schema.Types.ObjectId, ref: "User" }, // Just store user reference
     boardMembers: [
       {
-        member: { type: Schema.Types.ObjectId, ref: "BoardMember", required: false }, // Not required
-        position: { type: String, required: false, trim: true }, // Not required
+        boardMember: { type: Schema.Types.ObjectId, ref: "BoardMember" },
+        position: String,
+        startDate: Date,
+        endDate: Date,
+        currentlyServing: Boolean,
       },
     ],
+    yearsInOperation: { type: Number },
+    annualExpenditure: { type: Number },
+    annualRevenue: { type: Number },
+    investmentAsk: {
+      type: String,
+      enum: ["0 - 50000", "50000 - 100000", "100000 - 500000", ">500000"],
+    },
+    sdgFocus: [{ type: String }],
+    businessGrowthStage: {
+      type: String,
+      enum: ["Idea", "Seed", "Early", "Growth", "Expansion", "Mature"],
+    },
   },
-  
+
   { timestamps: true }
 );
 

@@ -46,5 +46,5 @@ export const uploadImage = (req, res) => {
     // Log unexpected errors
     console.error('Unexpected error:', error);
     res.status(500).send('Internal server error.');
-  }
+  } 
 };

@@ -19,6 +19,7 @@ import authRouter from "./routes/auth.routes.js";
 import categoryRoutes from "./routes/category.js";
 import uploadRoutes from "./routes/uploadRoutes.js";
 import imageRoutes from './routes/imageRoutes.js';
+import sdgFocusRoutes from './routes/sdgFocusRoutes.js'
 import errorMiddleware from "./middlewares/error.middleware.js";
 import path from "path";
 import { fileURLToPath } from 'url';
@@ -63,6 +64,7 @@ app.use("/api/v1/user", userRoutes);
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/people", peopleRoutes);
 app.use("/api/v1/upload", uploadRoutes);
+app.use("/api/v1/sdgFocus", sdgFocusRoutes);
 
 // Use image routes
 app.use('/api/v1/images', imageRoutes);
