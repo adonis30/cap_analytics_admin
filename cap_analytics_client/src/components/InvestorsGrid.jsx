@@ -47,7 +47,7 @@ const InvestorsGrid = () => {
     { field: "email", headerName: "Email", width: 250 },
     { field: "phoneNumber", headerName: "Phone Number", width: 200 },
     { field: "totalAmountFunded", headerName: "Total Funded", width: 180 },
-    { field: "highestAmountFunded", headerName: "Highest Funded", width: 180 },
+    { field: "sectors", headerName: "sectors", width: 180 },
     {
       field: "actions",
       headerName: "Actions",
@@ -99,7 +99,7 @@ const InvestorsGrid = () => {
           email: investor.email,
           phoneNumber: investor.phoneNumber,
           totalAmountFunded: investor.totalAmountFunded,
-          highestAmountFunded: investor.highestAmountFunded,
+          sectors: investor.sectors,
         }))}
         columns={columns}
         pageSize={10}

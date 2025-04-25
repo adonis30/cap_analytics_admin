@@ -1,4 +1,4 @@
-import { set, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import {
@@ -46,19 +46,38 @@ const institutionInvestorCategories = [
   { value: "Corporate Venture Capital", label: "Corporate Venture Capital" },
 ];
 
-// Yup schema
+// Validation schema
 const schema = yup.object().shape({
   type: yup.string().oneOf(["Individual", "Institution"]).required(),
   name: yup.string().required(),
   email: yup.string().email().required(),
   phoneNumber: yup.string().required(),
   totalAmountFunded: yup.number().required(),
-  highestAmountFunded: yup.number().required(),
   investorCategory: yup.string().required("Investor category is required"),
+
+  ticketSize: yup
+    .string()
+    .oneOf(["0 - 50000", "50000 - 100000", "100000 - 500000", ">500000"])
+    .required("Ticket size is required"),
+
+  sectors: yup.array().of(yup.string()).min(1, "At least one sector is required"),
+
   fundingTypes: yup.array().of(yup.string()),
   fundingRounds: yup.array().of(yup.string()),
   fundingInstruments: yup.array().of(yup.string()),
   fundedCompaniesIds: yup.array().of(yup.string()),
+
+  investmentHistory: yup.array().of(
+    yup.object().shape({
+      company: yup.string().required("Company is required"),
+      amount: yup.number().typeError("Must be a number").required("Amount is required"),
+      date: yup.date().required("Date is required"),
+      fundingRound: yup.string().nullable(),
+      fundingType: yup.string().nullable(),
+      fundingInstrument: yup.string().nullable(),
+      notes: yup.string().nullable(),
+    })
+  ),
 
   individualDetails: yup
     .object({
@@ -102,9 +121,7 @@ const schema = yup.object().shape({
       is: "Institution",
       then: (schema) =>
         schema.shape({
-          organizationName: yup
-            .string()
-            .required("Organization name is required"),
+          organizationName: yup.string().required("Organization name is required"),
           imageUrl: yup.string().required("Image URL is required"),
         }),
       otherwise: (schema) =>
@@ -114,6 +131,7 @@ const schema = yup.object().shape({
         }),
     }),
 });
+
 
 const CreateInvestorForm = ({ investor, investorId }) => {
   const {
@@ -142,6 +160,7 @@ const CreateInvestorForm = ({ investor, investorId }) => {
 
   const formMode = investorId && investorData ? "update" : "create";
 
+   
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [previewUrl, setPreviewUrl] = useState(null);
   const [selectedFile, setSelectedFile] = useState(null);
@@ -161,13 +180,15 @@ const CreateInvestorForm = ({ investor, investorId }) => {
       name: "",
       email: "",
       phoneNumber: "",
-      investorCategory: "",
       totalAmountFunded: 0,
-      highestAmountFunded: 0,
+      investorCategory: "",
       fundingTypes: [],
       fundingRounds: [],
       fundingInstruments: [],
       fundedCompaniesIds: [],
+      ticketSize: "",
+      sectors: [],
+      investmentHistory: [],
       individualDetails: {},
       institutionDetails: {},
     },
@@ -181,7 +202,6 @@ const CreateInvestorForm = ({ investor, investorId }) => {
         email,
         phoneNumber,
         totalAmountFunded,
-        highestAmountFunded,
         fundingTypes,
         fundingRounds,
         fundingInstruments,
@@ -189,8 +209,12 @@ const CreateInvestorForm = ({ investor, investorId }) => {
         individualDetails,
         institutionDetails,
         investorCategory,
+        ticketSize,
+        sectors,
+        investmentHistory,
       } = investorData;
 
+      // pick the right image URL
       const imageUrl =
         type === "Individual"
           ? individualDetails?.imageUrl
@@ -199,24 +223,54 @@ const CreateInvestorForm = ({ investor, investorId }) => {
       setPreviewUrl(imageUrl || null);
 
       reset({
+        // existing fields
         type: type || "Individual",
         name,
         email,
         phoneNumber,
         totalAmountFunded,
-        highestAmountFunded,
-        fundingTypes: fundingTypes?.map((ft) =>
-          typeof ft === "string" ? ft : ft._id
-        ),
-        fundingRounds: fundingRounds?.map((fr) =>
-          typeof fr === "string" ? fr : fr._id
-        ),
-        fundingInstruments: fundingInstruments?.map((fi) =>
-          typeof fi === "string" ? fi : fi._id
-        ),
-        fundedCompaniesIds: fundedCompaniesIds?.map((c) =>
-          typeof c === "string" ? c : c._id
-        ),
+        fundingTypes:
+          fundingTypes?.map((ft) => (typeof ft === "string" ? ft : ft._id)) ??
+          [],
+        fundingRounds:
+          fundingRounds?.map((fr) => (typeof fr === "string" ? fr : fr._id)) ??
+          [],
+        fundingInstruments:
+          fundingInstruments?.map((fi) =>
+            typeof fi === "string" ? fi : fi._id
+          ) ?? [],
+        fundedCompaniesIds:
+          fundedCompaniesIds?.map((c) => (typeof c === "string" ? c : c._id)) ??
+          [],
+        investorCategory: investorCategory || "",
+
+        // ← NEW: ticketSize
+        ticketSize: ticketSize || "",
+
+        // ← NEW: sectors
+        sectors: Array.isArray(sectors) ? sectors : [],
+
+        // ← NEW: investmentHistory
+        investmentHistory: Array.isArray(investmentHistory)
+          ? investmentHistory.map((h) => ({
+              company:
+                typeof h.company === "string" ? h.company : h.company._id,
+              amount: h.amount,
+              date: h.date ? new Date(h.date) : null,
+              fundingRound: h.fundingRound || "",
+              fundingType:
+                typeof h.fundingType === "string"
+                  ? h.fundingType
+                  : h.fundingType?._id || "",
+              fundingInstrument:
+                typeof h.fundingInstrument === "string"
+                  ? h.fundingInstrument
+                  : h.fundingInstrument?._id || "",
+              notes: h.notes || "",
+            }))
+          : [],
+
+        // existing nested details
         individualDetails: {
           ...individualDetails,
           imageUrl: individualDetails?.imageUrl || "",
@@ -225,7 +279,6 @@ const CreateInvestorForm = ({ investor, investorId }) => {
           ...institutionDetails,
           imageUrl: institutionDetails?.imageUrl || "",
         },
-        investorCategory: investorCategory || "",
       });
     }
   }, [investorData, formMode, reset]);
@@ -326,7 +379,10 @@ const CreateInvestorForm = ({ investor, investorId }) => {
       ? individualInvestorCategories
       : institutionInvestorCategories;
 
+   
   const onSubmit = async (data) => {
+     
+
     setIsSubmitting(true);
     try {
       // 🧠 Determine which image field to update
@@ -388,13 +444,15 @@ const CreateInvestorForm = ({ investor, investorId }) => {
         );
         navigate("/investors");
       } else {
-        console.warn("API response did not return success flag:", response);
-        alert("Submission might have failed. Check logs or try again.");
+        alert(
+          "Submission might have failed. Check logs or try again.",
+          response
+        );
       }
     } catch (error) {
-      console.error("Submission error:", error);
       alert(
-        "An error occurred during submission. Please check your network or data."
+        "An error occurred during submission. Please check your network or data.",
+        error.message || error.data?.message || error.error
       );
     } finally {
       setIsSubmitting(false);
@@ -421,7 +479,7 @@ const CreateInvestorForm = ({ investor, investorId }) => {
       </Box>
     );
   }
-   
+
   return (
     <Paper sx={{ p: 4 }}>
       <Typography variant="h5" gutterBottom>
@@ -448,7 +506,7 @@ const CreateInvestorForm = ({ investor, investorId }) => {
             <TextField
               select
               fullWidth
-              label="Investor Category"
+              label="Select Investor Category"
               value={watch("investorCategory")} // ✅ ensure it's bound
               {...register("investorCategory")}
               error={!!errors.investorCategory}
@@ -505,12 +563,38 @@ const CreateInvestorForm = ({ investor, investorId }) => {
 
           <Grid item xs={12} md={4}>
             <TextField
-              label="Highest Amount Funded"
-              type="number"
+              select
               fullWidth
-              {...register("highestAmountFunded")}
-              error={!!errors.highestAmountFunded}
-              helperText={errors.highestAmountFunded?.message}
+              label="Ticket Size"
+              value={watch("ticketSize") || ""}
+              {...register("ticketSize")}
+              error={!!errors.ticketSize}
+              helperText={errors.ticketSize?.message}
+            >
+              {[
+                "0 - 50000",
+                "50000 - 100000",
+                "100000 - 500000",
+                ">500000",
+              ].map((option) => (
+                <MenuItem key={option} value={option}>
+                  {option}
+                </MenuItem>
+              ))}
+            </TextField>
+          </Grid>
+
+          <Grid item xs={12} md={4}>
+            <MultiSelectDropdown
+              options={
+                categoriesData?.map((cat) => ({
+                  value: cat._id,
+                  label: cat.name,
+                })) ?? []
+              }
+              defaultValue={watch("sectors")}
+              onChange={(values) => handleDropdownChange(values, "sectors")}
+               placeholder="Select Sectors"
             />
           </Grid>
 
