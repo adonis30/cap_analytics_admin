@@ -2,6 +2,40 @@ import mongoose from "mongoose";
 
 const { Schema, models, model } = mongoose;
 
+// Reusable investment history sub-schema
+const InvestmentHistorySchema = new Schema(
+  {
+    company: {
+      type: Schema.Types.ObjectId,
+      ref: "Company",
+      required: true,
+    },
+    amount: {
+      type: Number,
+      required: true,
+    },
+    date: {
+      type: Date,
+      default: Date.now,
+    },
+    fundingRound: {
+      type: String,
+    },
+    fundingType: {
+      type: Schema.Types.ObjectId,
+      ref: "FundingType",
+    },
+    fundingInstrument: {
+      type: Schema.Types.ObjectId,
+      ref: "FundingInstrument",
+    },
+    notes: {
+      type: String,
+    },
+  },
+  { _id: false }
+);
+
 // Base Investor Schema
 const BaseInvestorSchema = new Schema(
   {
@@ -31,11 +65,27 @@ const BaseInvestorSchema = new Schema(
     email: { type: String, required: true },
     phoneNumber: { type: String, required: true },
     totalAmountFunded: { type: Number, required: true },
-    highestAmountFunded: { type: Number, required: true },
+
+    // Add this ↓↓↓
+    sectors: [{ type: Schema.Types.ObjectId, ref: "Category" }],
+
     fundingTypes: [{ type: Schema.Types.ObjectId, ref: "FundingType" }],
     fundingRounds: [{ type: Schema.Types.ObjectId, ref: "FundingRound" }],
     fundingInstruments: [{ type: Schema.Types.ObjectId, ref: "FundingInstrument" }],
     fundedCompaniesIds: [{ type: Schema.Types.ObjectId, ref: "Company" }],
+
+    investmentHistory: [InvestmentHistorySchema],
+
+    ticketSize: {
+      type: String,
+      enum: [
+        "0 - 50000",
+        "50000 - 100000",
+        "100000 - 500000",
+        ">500000",
+      ],
+      required: true,
+    },
   },
   { discriminatorKey: "type", timestamps: true }
 );
