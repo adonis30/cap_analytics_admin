@@ -78,12 +78,7 @@ const BaseInvestorSchema = new Schema(
 
     ticketSize: {
       type: String,
-      enum: [
-        "0 - 50000",
-        "50000 - 100000",
-        "100000 - 500000",
-        ">500000",
-      ],
+      
       required: true,
     },
   },

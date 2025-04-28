@@ -56,9 +56,7 @@ export const getInvestorById = async (req, res) => {
  */
 export const createInvestor = async (req, res) => {
   const { type, ...rest } = req.body;
-
-  
-
+   
   try {
     let newInvestor;
     if (type === "Individual") {
@@ -72,7 +70,10 @@ export const createInvestor = async (req, res) => {
     await newInvestor.save();
     res.status(201).json(newInvestor);
   } catch (error) {
-     
+    console.error("Error creating investor:", error.message);
+    if (error.name === "ValidationError") {
+      return res.status(400).json({ message: error.message });
+    }
     res.status(500).json({ message: error.message });
   }
 };

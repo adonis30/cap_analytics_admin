@@ -19,10 +19,10 @@ import authRouter from "./routes/auth.routes.js";
 import categoryRoutes from "./routes/category.js";
 import uploadRoutes from "./routes/uploadRoutes.js";
 import imageRoutes from './routes/imageRoutes.js';
-import sdgFocusRoutes from './routes/sdgFocusRoutes.js'
+import sdgFocusRoutes from './routes/sdgFocusRoutes.js';
+import ticketSize from './routes/ticketSize.js';
+import sector from './routes/sector.js';
 import errorMiddleware from "./middlewares/error.middleware.js";
-import path from "path";
-import { fileURLToPath } from 'url';
  
 
 /* CONFIGURATION */
@@ -65,6 +65,9 @@ app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/people", peopleRoutes);
 app.use("/api/v1/upload", uploadRoutes);
 app.use("/api/v1/sdgFocus", sdgFocusRoutes);
+app.use("/api/v1/sectors", sector);
+app.use("/api/v1/ticketSize", ticketSize);
+
 
 // Use image routes
 app.use('/api/v1/images', imageRoutes);
