@@ -273,6 +273,74 @@ export const api = createApi({
       invalidatesTags: ['Investor'],
     }),
 
+    // CRUD tools
+    getSector: build.query({
+      query: () => `${url}sectors`,
+      providesTags: ['Sectors'],
+    }),
+
+    getSectorById: build.query({
+      query: (id) => `${url}sectors/${id}`,
+      providesTags: (result, error, id) => [{ type: 'Sector', id }],
+    }),
+    createSector: build.mutation({
+      query: (newSector) => ({
+        url: `${url}sectors`,
+        method: 'POST',
+        body: newSector,
+      }),
+      invalidatesTags: ['Sectors'],
+    }),
+    updateSector: build.mutation({
+      query: ({ id, ...updatedData }) => ({
+        url: `${url}sectors/${id}`,
+        method: 'PUT',
+        body: updatedData,
+      }),
+      invalidatesTags: (result, error, { id }) => [{ type: 'Sectors', id }],
+    }),
+    deleteSector: build.mutation({
+      query: (id) => ({
+        url: `${url}sectors/${id}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ['Sectors'],
+    }),
+
+    getTicketSize: build.query({
+      query: () => `${url}ticketSize`,
+      providesTags: ['TicketSize'],
+    }),
+    getTicketSizeById: build.query({
+      query: (id) => `${url}ticketSize/${id}`,
+      providesTags: (result, error, id) => [{ type: 'TicketSize', id }],
+    }),
+    createTicketSize: build.mutation({
+      query: (newTicketSize) => ({
+        url: `${url}ticketSize`,
+        method: 'POST',
+        body: newTicketSize,
+      }),
+      invalidatesTags: ['TicketSize'],
+
+    }),
+    updateTicketSize: build.mutation({
+      query: ({ id, ...updatedData }) => ({
+        url: `${url}ticketSize/${id}`,
+        method: 'PUT',
+        body: updatedData,
+      }),
+      invalidatesTags: (result, error, { id }) => [{ type: 'TicketSize', id }],
+    }),
+    deleteTicketSize: build.mutation({
+      query: (id) => ({
+        url: `${url}ticketSize/${id}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ['TicketSize'],
+    }),
+
+
     // CRUD for Board Members
     getBoardMembers: build.query({
       query: () => `${url}general/boardMembers`,
@@ -399,4 +467,14 @@ export const {
   useUpdatesdgFocusMutation,
   useDeletesdgFocusMutation,
   useInitiateUploadMutation,
+  useGetSectorQuery,
+  useGetSectorByIdQuery,
+  useCreateSectorMutation,
+  useUpdateSectorMutation,
+  useDeleteSectorMutation,
+  useGetTicketSizeQuery,
+  useGetTicketSizeByIdQuery,
+  useCreateTicketSizeMutation,
+  useUpdateTicketSizeMutation,
+  useDeleteTicketSizeMutation,
 } = api;

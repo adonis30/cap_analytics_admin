@@ -43,8 +43,8 @@ const FundingOverview = () => {
         </Box>
         <FundingGrid data={fundingInstruments} type="FundingInstrument" />
       </Box>
-
-      {/* Funding Types */}
+{/* 
+      
       <Box mb={4} m="1.5rem 2.5rem">
         <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
           <Typography variant="h6" gutterBottom>
@@ -55,7 +55,7 @@ const FundingOverview = () => {
           </Button>
         </Box>
         <FundingGrid data={fundingTypes} type="FundingType" />
-      </Box>
+      </Box> */}
 
       {/* Funding Rounds */}
       <Box mb={4} m="1.5rem 2.5rem">

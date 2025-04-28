@@ -26,6 +26,7 @@ import {
   useUpdateInvestorMutation,
   useGetCategoriesQuery,
   useGetCompaniesQuery,
+  useGetTicketSizeQuery,
 } from "state/api";
 import { useNavigate } from "react-router-dom";
 
@@ -55,12 +56,12 @@ const schema = yup.object().shape({
   totalAmountFunded: yup.number().required(),
   investorCategory: yup.string().required("Investor category is required"),
 
-  ticketSize: yup
-    .string()
-    .oneOf(["0 - 50000", "50000 - 100000", "100000 - 500000", ">500000"])
-    .required("Ticket size is required"),
+  ticketSize: yup.string().required("Ticket size is required"),
 
-  sectors: yup.array().of(yup.string()).min(1, "At least one sector is required"),
+  sectors: yup
+    .array()
+    .of(yup.string())
+    .min(1, "At least one sector is required"),
 
   fundingTypes: yup.array().of(yup.string()),
   fundingRounds: yup.array().of(yup.string()),
@@ -70,7 +71,10 @@ const schema = yup.object().shape({
   investmentHistory: yup.array().of(
     yup.object().shape({
       company: yup.string().required("Company is required"),
-      amount: yup.number().typeError("Must be a number").required("Amount is required"),
+      amount: yup
+        .number()
+        .typeError("Must be a number")
+        .required("Amount is required"),
       date: yup.date().required("Date is required"),
       fundingRound: yup.string().nullable(),
       fundingType: yup.string().nullable(),
@@ -121,7 +125,9 @@ const schema = yup.object().shape({
       is: "Institution",
       then: (schema) =>
         schema.shape({
-          organizationName: yup.string().required("Organization name is required"),
+          organizationName: yup
+            .string()
+            .required("Organization name is required"),
           imageUrl: yup.string().required("Image URL is required"),
         }),
       otherwise: (schema) =>
@@ -131,7 +137,6 @@ const schema = yup.object().shape({
         }),
     }),
 });
-
 
 const CreateInvestorForm = ({ investor, investorId }) => {
   const {
@@ -151,6 +156,8 @@ const CreateInvestorForm = ({ investor, investorId }) => {
   const { data: categoriesData, isLoading: categoriesLoading } =
     useGetCategoriesQuery();
 
+    const { data: ticketSizeData = [] } = useGetTicketSizeQuery();
+   
   const navigate = useNavigate();
 
   const [initiateUpload] = useInitiateUploadMutation();
@@ -160,7 +167,6 @@ const CreateInvestorForm = ({ investor, investorId }) => {
 
   const formMode = investorId && investorData ? "update" : "create";
 
-   
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [previewUrl, setPreviewUrl] = useState(null);
   const [selectedFile, setSelectedFile] = useState(null);
@@ -186,7 +192,7 @@ const CreateInvestorForm = ({ investor, investorId }) => {
       fundingRounds: [],
       fundingInstruments: [],
       fundedCompaniesIds: [],
-      ticketSize: "",
+      ticketSize: [],
       sectors: [],
       investmentHistory: [],
       individualDetails: {},
@@ -246,6 +252,7 @@ const CreateInvestorForm = ({ investor, investorId }) => {
 
         // ← NEW: ticketSize
         ticketSize: ticketSize || "",
+          
 
         // ← NEW: sectors
         sectors: Array.isArray(sectors) ? sectors : [],
@@ -299,6 +306,15 @@ const CreateInvestorForm = ({ investor, investorId }) => {
       ? fundingRoundsData.fundingRounds.map((fr) => ({
           value: fr._id,
           label: fr.name,
+        }))
+      : [];
+
+  const ticketSizeOptions =
+    Array.isArray(ticketSizeData?.ticketSize) &&
+    ticketSizeData.ticketSize.length > 0
+      ? ticketSizeData.ticketSize.map((ts) => ({
+          value: ts._id,
+          label: ts.number,
         }))
       : [];
 
@@ -379,11 +395,9 @@ const CreateInvestorForm = ({ investor, investorId }) => {
       ? individualInvestorCategories
       : institutionInvestorCategories;
 
-   
   const onSubmit = async (data) => {
-     
-
     setIsSubmitting(true);
+    console.log("Form data before submission:", data); // Debugging line
     try {
       // 🧠 Determine which image field to update
       const imageField =
@@ -571,16 +585,15 @@ const CreateInvestorForm = ({ investor, investorId }) => {
               error={!!errors.ticketSize}
               helperText={errors.ticketSize?.message}
             >
-              {[
-                "0 - 50000",
-                "50000 - 100000",
-                "100000 - 500000",
-                ">500000",
-              ].map((option) => (
-                <MenuItem key={option} value={option}>
-                  {option}
-                </MenuItem>
-              ))}
+              {Array.isArray(ticketSizeData) && ticketSizeData.length > 0 ? (
+                ticketSizeData.map((item) => (
+                  <MenuItem key={item._number} value={item.number}>
+                    {item.number}
+                  </MenuItem>
+                ))
+              ) : (
+                <MenuItem value="">No Ticket Sizes Available</MenuItem>
+              )}
             </TextField>
           </Grid>
 
@@ -594,12 +607,12 @@ const CreateInvestorForm = ({ investor, investorId }) => {
               }
               defaultValue={watch("sectors")}
               onChange={(values) => handleDropdownChange(values, "sectors")}
-               placeholder="Select Sectors"
+              placeholder="Select Sectors"
             />
           </Grid>
 
           {/* Funding Selects */}
-          <Grid item xs={12} md={4}>
+          {/* <Grid item xs={12} md={4}>
             <MultiSelectDropdown
               options={fundingTypeOptions}
               defaultValue={selectedFundingTypes}
@@ -608,7 +621,7 @@ const CreateInvestorForm = ({ investor, investorId }) => {
               }
               placeholder="Select Funding Types"
             />
-          </Grid>
+          </Grid> */}
 
           <Grid item xs={12} md={4}>
             {fundingRoundOptions.length > 0 ? (

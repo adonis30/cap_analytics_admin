@@ -643,7 +643,7 @@ const CompaniesForm = ({ company, companyId }) => {
               />
             </Grid>
 
-            <Grid item xs={12} md={4}>
+           {/*  <Grid item xs={12} md={4}>
               <MultiSelectDropdown
                 options={fundingTypeOptions}
                 defaultValue={selectedFundingTypes}
@@ -655,7 +655,7 @@ const CompaniesForm = ({ company, companyId }) => {
                   handleAddOption(createFundingType, inputValue, "Funding Type")
                 }
               />
-            </Grid>
+            </Grid> */}
             <Grid item xs={12} md={4}>
               {fundingRoundOptions.length > 0 ? (
                 <MultiSelectDropdown

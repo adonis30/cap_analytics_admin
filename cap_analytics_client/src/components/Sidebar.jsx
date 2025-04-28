@@ -59,16 +59,13 @@ const navItems = [
     text: "Fundings",
     icon: <PublicOutlined />,
   },
+  
   {
-    text: "SDG",
-    icon: <PointOfSaleOutlined />,
-  },
-  {
-    text: "Deals",
+    text: "Deals and tools",
     icon: null,
   },
   {
-    text: "Overview",
+    text: "tools",
     icon: <PointOfSaleOutlined />,
   },
   {
