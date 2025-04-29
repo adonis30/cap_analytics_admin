@@ -1,7 +1,6 @@
-import TicketSize from "../models/ticketSize.js";
+import TicketSize from "../models/TicketSize.js";
 
-import mongoose from "mongoose";
-
+ 
 export const getAllTicketSizes = async (req, res) => {
   try {
     const ticketSizes = await TicketSize.find();
