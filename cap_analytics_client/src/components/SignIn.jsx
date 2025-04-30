@@ -177,7 +177,7 @@ export default function SignIn(props) {
             <Link
               component="button"
               type="button"
-               onClick={() => navigate("/signup")}
+               onClick={() => alert("Kindly contact Admin to create an account")}
               variant="body2"
               sx={{ alignSelf: "center" }}
             >

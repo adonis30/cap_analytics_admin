@@ -27,6 +27,7 @@ import {
   useGetCategoriesQuery,
   useGetCompaniesQuery,
   useGetTicketSizeQuery,
+  useGetSectorQuery,
 } from "state/api";
 import { useNavigate } from "react-router-dom";
 
@@ -156,6 +157,10 @@ const CreateInvestorForm = ({ investor, investorId }) => {
   const { data: categoriesData, isLoading: categoriesLoading } =
     useGetCategoriesQuery();
 
+  const { data: sectorsData, isLoading: sectorsLoading } = useGetSectorQuery();
+
+   
+
     const { data: ticketSizeData = [] } = useGetTicketSizeQuery();
    
   const navigate = useNavigate();
@@ -255,8 +260,7 @@ const CreateInvestorForm = ({ investor, investorId }) => {
           
 
         // ← NEW: sectors
-        sectors: Array.isArray(sectors) ? sectors : [],
-
+        sectors:  sectors?.map((s) => (typeof s === "string" ? s : s._id)) || [],
         // ← NEW: investmentHistory
         investmentHistory: Array.isArray(investmentHistory)
           ? investmentHistory.map((h) => ({
@@ -306,6 +310,15 @@ const CreateInvestorForm = ({ investor, investorId }) => {
       ? fundingRoundsData.fundingRounds.map((fr) => ({
           value: fr._id,
           label: fr.name,
+        }))
+      : [];
+
+  const selectedSectorsOptions =
+    Array.isArray(sectorsData?.sectors) &&
+    sectorsData.sectors.length > 0
+      ? sectorsData.sectors.map((s) => ({
+          value: s._id,
+          label: s.name,
         }))
       : [];
 
@@ -394,7 +407,7 @@ const CreateInvestorForm = ({ investor, investorId }) => {
     investorType === "Individual"
       ? individualInvestorCategories
       : institutionInvestorCategories;
-
+   
   const onSubmit = async (data) => {
     setIsSubmitting(true);
     console.log("Form data before submission:", data); // Debugging line
@@ -600,10 +613,12 @@ const CreateInvestorForm = ({ investor, investorId }) => {
           <Grid item xs={12} md={4}>
             <MultiSelectDropdown
               options={
-                categoriesData?.map((cat) => ({
-                  value: cat._id,
-                  label: cat.name,
-                })) ?? []
+                selectedSectorsOptions.length > 0
+                  ? selectedSectorsOptions
+                  : sectorsData?.map((s) => ({
+                      value: s._id,
+                      label: s.name,
+                    })) ?? []
               }
               defaultValue={watch("sectors")}
               onChange={(values) => handleDropdownChange(values, "sectors")}
