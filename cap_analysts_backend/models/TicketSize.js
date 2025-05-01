@@ -1,10 +1,18 @@
 import mongoose from "mongoose";
 
-
 const ticketSizeSchema = new mongoose.Schema(
   {
-    number: { type: String, required: true }, // Required name field
-    description: { type: String }, // Optional description field
+    min: {
+      type: Number,
+      required: true,
+    },
+    max: {
+      type: Number,
+      required: true,
+    },
+    description: {
+      type: String,
+    },
   },
   {
     timestamps: true, // Adds createdAt and updatedAt fields

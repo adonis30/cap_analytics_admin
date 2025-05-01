@@ -21,6 +21,7 @@ import uploadRoutes from "./routes/uploadRoutes.js";
 import imageRoutes from './routes/imageRoutes.js';
 import sdgFocusRoutes from './routes/sdgFocusRoutes.js';
 import ticketSize from './routes/ticketSize.js';
+import investmentAsk from './routes/investmentAsk.js'; // Importing the investment ask routes
 import sector from './routes/sector.js';
 import errorMiddleware from "./middlewares/error.middleware.js";
  
@@ -67,6 +68,7 @@ app.use("/api/v1/upload", uploadRoutes);
 app.use("/api/v1/sdgFocus", sdgFocusRoutes);
 app.use("/api/v1/sectors", sector);
 app.use("/api/v1/ticketSize", ticketSize);
+app.use("/api/v1/investmentAsk", investmentAsk);
 
 
 // Use image routes
