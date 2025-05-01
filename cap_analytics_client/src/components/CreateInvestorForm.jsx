@@ -159,10 +159,8 @@ const CreateInvestorForm = ({ investor, investorId }) => {
 
   const { data: sectorsData, isLoading: sectorsLoading } = useGetSectorQuery();
 
-   
+  const { data: ticketSizeData = [] } = useGetTicketSizeQuery();
 
-    const { data: ticketSizeData = [] } = useGetTicketSizeQuery();
-   
   const navigate = useNavigate();
 
   const [initiateUpload] = useInitiateUploadMutation();
@@ -257,10 +255,9 @@ const CreateInvestorForm = ({ investor, investorId }) => {
 
         // ← NEW: ticketSize
         ticketSize: ticketSize || "",
-          
 
         // ← NEW: sectors
-        sectors:  sectors?.map((s) => (typeof s === "string" ? s : s._id)) || [],
+        sectors: sectors?.map((s) => (typeof s === "string" ? s : s._id)) || [],
         // ← NEW: investmentHistory
         investmentHistory: Array.isArray(investmentHistory)
           ? investmentHistory.map((h) => ({
@@ -304,6 +301,11 @@ const CreateInvestorForm = ({ investor, investorId }) => {
   const selectedFundingInstruments = watch("fundingInstruments");
   const selectedInvestorCategory = watch("investorCategory");
 
+  const ticketSizeValue = watch("ticketSize");
+  const ticketSizeValid = ticketSizeData.some(
+    (item) => item.number === ticketSizeValue
+  );
+
   const fundingRoundOptions =
     Array.isArray(fundingRoundsData?.fundingRounds) &&
     fundingRoundsData.fundingRounds.length > 0
@@ -314,8 +316,7 @@ const CreateInvestorForm = ({ investor, investorId }) => {
       : [];
 
   const selectedSectorsOptions =
-    Array.isArray(sectorsData?.sectors) &&
-    sectorsData.sectors.length > 0
+    Array.isArray(sectorsData?.sectors) && sectorsData.sectors.length > 0
       ? sectorsData.sectors.map((s) => ({
           value: s._id,
           label: s.name,
@@ -407,10 +408,10 @@ const CreateInvestorForm = ({ investor, investorId }) => {
     investorType === "Individual"
       ? individualInvestorCategories
       : institutionInvestorCategories;
-   
+
   const onSubmit = async (data) => {
     setIsSubmitting(true);
-    console.log("Form data before submission:", data); // Debugging line
+     
     try {
       // 🧠 Determine which image field to update
       const imageField =
@@ -593,20 +594,16 @@ const CreateInvestorForm = ({ investor, investorId }) => {
               select
               fullWidth
               label="Ticket Size"
-              value={watch("ticketSize") || ""}
+              value={ticketSizeValid ? ticketSizeValue : ""}
               {...register("ticketSize")}
               error={!!errors.ticketSize}
               helperText={errors.ticketSize?.message}
             >
-              {Array.isArray(ticketSizeData) && ticketSizeData.length > 0 ? (
-                ticketSizeData.map((item) => (
-                  <MenuItem key={item._number} value={item.number}>
-                    {item.number}
-                  </MenuItem>
-                ))
-              ) : (
-                <MenuItem value="">No Ticket Sizes Available</MenuItem>
-              )}
+              {ticketSizeData.map((item) => (
+                <MenuItem key={item.number} value={item.number}>
+                  {item.number}
+                </MenuItem>
+              ))}
             </TextField>
           </Grid>
 
@@ -615,10 +612,10 @@ const CreateInvestorForm = ({ investor, investorId }) => {
               options={
                 selectedSectorsOptions.length > 0
                   ? selectedSectorsOptions
-                  : sectorsData?.map((s) => ({
+                  : (sectorsData?.map((s) => ({
                       value: s._id,
                       label: s.name,
-                    })) ?? []
+                    })) ?? [])
               }
               defaultValue={watch("sectors")}
               onChange={(values) => handleDropdownChange(values, "sectors")}

@@ -26,8 +26,8 @@ const CompaniesGrid = () => {
         await deleteCompany(id).unwrap();
         alert("Company deleted successfully");
       } catch (error) {
-        console.error("Error deleting company:", error);
-        alert("Failed to delete the company.");
+        //console.error("Error deleting company:", error);
+        alert("Failed to delete the company.", error.message);
       }
     }
   };

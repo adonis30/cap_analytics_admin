@@ -2,10 +2,10 @@ import React from "react";
 import { DataGrid } from "@mui/x-data-grid";
 import { Box, Button, CircularProgress } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import { 
-  useDeletesdgFocusMutation, 
-  useDeleteSectorMutation, 
-  useDeleteTicketSizeMutation 
+import {
+  useDeletesdgFocusMutation,
+  useDeleteSectorMutation,
+  useDeleteTicketSizeMutation,
 } from "state/api";
 
 const Tools = ({ data = [], type, loading }) => {
@@ -14,44 +14,6 @@ const Tools = ({ data = [], type, loading }) => {
   const [deleteSector] = useDeleteSectorMutation();
   const [deleteTicket] = useDeleteTicketSizeMutation();
   const [deleteSdgFocus] = useDeletesdgFocusMutation();
-
-  const columns = [
-    {
-      field: "mainField", // Dynamic field
-      headerName: type === "ticketsize" ? "Amount" : "Name",
-      width: 200,
-    },
-    {
-      field: "description",
-      headerName: "Description",
-      width: 400,
-    },
-    {
-      field: "actions",
-      headerName: "Actions",
-      sortable: false,
-      width: 150,
-      renderCell: (params) => (
-        <Box display="flex" gap={1}>
-          <Button
-            variant="contained"
-            size="small"
-            onClick={() => handleEdit(params.id)}
-          >
-            Edit
-          </Button>
-          <Button
-            variant="contained"
-            color="error"
-            size="small"
-            onClick={() => handleDelete(params.id)}
-          >
-            Delete
-          </Button>
-        </Box>
-      ),
-    },
-  ];
 
   const handleEdit = (id) => {
     navigate(`/tools/update/${type}/${id}`);
@@ -74,6 +36,40 @@ const Tools = ({ data = [], type, loading }) => {
     }
   };
 
+  const columns = [
+    {
+      field: "mainField",
+      headerName: type === "ticketsize" ? "Range (Min - Max)" : "Name",
+      width: 250,
+    },
+    {
+      field: "description",
+      headerName: "Description",
+      width: 400,
+    },
+    {
+      field: "actions",
+      headerName: "Actions",
+      sortable: false,
+      width: 150,
+      renderCell: (params) => (
+        <Box display="flex" gap={1}>
+          <Button variant="contained" size="small" onClick={() => handleEdit(params.id)}>
+            Edit
+          </Button>
+          <Button
+            variant="contained"
+            color="error"
+            size="small"
+            onClick={() => handleDelete(params.id)}
+          >
+            Delete
+          </Button>
+        </Box>
+      ),
+    },
+  ];
+
   if (loading) {
     return (
       <Box display="flex" justifyContent="center" alignItems="center" minHeight="200px">
@@ -87,7 +83,10 @@ const Tools = ({ data = [], type, loading }) => {
       <DataGrid
         rows={data.map((item) => ({
           id: item._id || item.id,
-          mainField: type === "ticketsize" ? item.number : item.name,
+          mainField:
+            type === "ticketsize"
+              ? `${item.min} - ${item.max}`
+              : item.name,
           description: item.description || "N/A",
         }))}
         columns={columns}

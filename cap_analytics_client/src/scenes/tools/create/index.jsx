@@ -65,7 +65,8 @@ const ToolsForm = ({
       reset();
       navigate("/tools");
     } catch (error) {
-      const errorMsg = error?.data?.message || error?.message || "Unknown error";
+      const errorMsg =
+        error?.data?.message || error?.message || "Unknown error";
       alert(`Error ${isUpdate ? "updating" : "creating"} tool: ${errorMsg}`);
     }
   };
@@ -78,15 +79,27 @@ const ToolsForm = ({
 
       <form onSubmit={handleSubmit(onSubmit)}>
         {title === "Ticket Size" ? (
-          <TextField
-            label="Amount"
-            fullWidth
-            margin="normal"
-            type="number"
-            {...register("number", { required: "Amount is required" })}
-            error={!!errors.number}
-            helperText={errors.number?.message}
-          />
+          <>
+            <TextField
+              label="Min Amount"
+              fullWidth
+              margin="normal"
+              type="number"
+              {...register("min", { required: "Minimum amount is required" })}
+              error={!!errors.min}
+              helperText={errors.min?.message}
+            />
+
+            <TextField
+              label="Max Amount"
+              fullWidth
+              margin="normal"
+              type="number"
+              {...register("max", { required: "Maximum amount is required" })}
+              error={!!errors.max}
+              helperText={errors.max?.message}
+            />
+          </>
         ) : (
           <TextField
             label="Name"

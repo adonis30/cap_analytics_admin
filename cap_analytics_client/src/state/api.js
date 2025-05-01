@@ -340,6 +340,42 @@ export const api = createApi({
       invalidatesTags: ['TicketSize'],
     }),
 
+    getInvestmentAsk: build.query({
+      query: () => `${url}investmentAsk`,
+      providesTags: ['InvestmentAsk'],
+    }),
+
+    getInvestmentAskById: build.query({
+      query: (id) => `${url}investmentAsk/${id}`,
+      providesTags: (result, error, id) => [{ type: 'InvestmentAsk', id }],
+    }),
+
+    createInvestmentAsk: build.mutation({
+      query: (newInvestmentAsk) => ({
+        url: `${url}investmentAsk`,
+        method: 'POST',
+        body: newInvestmentAsk,
+      }),
+      invalidatesTags: ['InvestmentAsk'],
+    }),
+
+    updateInvestmentAsk: build.mutation({
+      query: ({ id, ...updatedData }) => ({
+        url: `${url}investmentAsk/${id}`,
+        method: 'PUT',
+        body: updatedData,
+      }),
+      invalidatesTags: (result, error, { id }) => [{ type: 'InvestmentAsk', id }],
+    }),
+
+    deleteInvestmentAsk: build.mutation({
+      query: (id) => ({
+        url: `${url}investmentAsk/${id}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ['InvestmentAsk'],
+    }),
+
 
     // CRUD for Board Members
     getBoardMembers: build.query({
