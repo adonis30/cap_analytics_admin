@@ -25,6 +25,9 @@ import {
   useUpdateSectorMutation,
   useUpdateTicketSizeMutation,
   useUpdatesdgFocusMutation,
+  useGetInvestmentAskQuery,
+  useCreateInvestmentAskMutation,
+  useUpdateInvestmentAskMutation,
 } from "state/api";
 
 const ToolsForm = ({
@@ -46,8 +49,9 @@ const ToolsForm = ({
 
   useEffect(() => {
     if (isUpdate && initialData) {
-      if (title === "Ticket Size") {
-        setValue("number", initialData.number);
+      if (title === "Ticket Size" || title === "Investment Ask") {
+        setValue("min", initialData.min);
+        setValue("max", initialData.max);
       } else {
         setValue("name", initialData.name);
       }
@@ -78,7 +82,7 @@ const ToolsForm = ({
       </Typography>
 
       <form onSubmit={handleSubmit(onSubmit)}>
-        {title === "Ticket Size" ? (
+        {title === "Ticket Size" || "Investment Ask" ? (
           <>
             <TextField
               label="Min Amount"
@@ -135,7 +139,9 @@ const ToolsForm = ({
               <TableHead>
                 <TableRow>
                   <TableCell>
-                    {title === "Ticket Size" ? "Amount" : "Name"}
+                    {title === "Ticket Size" || "Investment Ask"
+                      ? "Amount"
+                      : "Name"}
                   </TableCell>
                   <TableCell>Description</TableCell>
                 </TableRow>
@@ -143,7 +149,12 @@ const ToolsForm = ({
               <TableBody>
                 {tableData.map((item) => (
                   <TableRow key={item._id || item.id}>
-                    <TableCell>{item.name}</TableCell>
+                    <TableCell>
+                      {title === "Ticket Size" || title === "Investment Ask"
+                        ? `${item.min} - ${item.max}`
+                        : item.name}
+                    </TableCell>
+
                     <TableCell>{item.description}</TableCell>
                   </TableRow>
                 ))}
@@ -258,6 +269,42 @@ export const EditTicketSize = () => {
       isUpdate
       initialData={ticketSizeToEdit}
       updateFn={updateTicketSize}
+    />
+  );
+};
+
+export const CreateInvestmentAsk = () => {
+  const { data: investmentAsk, isLoading } = useGetInvestmentAskQuery();
+  const [CreateInvestmentAsk] = useCreateInvestmentAskMutation();
+
+  if (isLoading) return <div>Loading Ticket Sizes...</div>;
+
+  return (
+    <ToolsForm
+      title="Investment Ask"
+      apiFn={CreateInvestmentAsk}
+      tableData={investmentAsk}
+    />
+  );
+};
+
+export const EditInvestmentAsk = () => {
+  const { id } = useParams();
+  const { data: investmentask = [] } = useGetInvestmentAskQuery();
+  const [updateInvestmentAsk] = useUpdateInvestmentAskMutation();
+
+  const investmentAskToEdit = investmentask.find(
+    (item) => item._id === id || item.id === id
+  );
+
+  if (!investmentAskToEdit) return <div>Loading investmentAsk...</div>;
+
+  return (
+    <ToolsForm
+      title="Investment Ask"
+      isUpdate
+      initialData={investmentAskToEdit}
+      updateFn={updateInvestmentAsk}
     />
   );
 };

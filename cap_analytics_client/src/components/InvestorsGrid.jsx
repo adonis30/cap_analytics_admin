@@ -1,10 +1,10 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { DataGrid } from "@mui/x-data-grid";
 import { useNavigate } from "react-router-dom";
 import { 
   useGetInvestorsQuery,
-  useUpdateInvestorMutation,
-  useDeleteInvestorMutation 
+  useDeleteInvestorMutation,
+  useGetSectorQuery, 
 } from "state/api";
 import {
   useTheme,
@@ -19,9 +19,25 @@ const InvestorsGrid = () => {
   const navigate = useNavigate();
   // Fetch investors data using RTK Query
   const { data: investors = [], isLoading, error } = useGetInvestorsQuery();
+  const { data: sectorsData = [] } = useGetSectorQuery(); // list of all sectors
+
 
   const [ deleteInvestor, { isLoading: isDeleting } ] = useDeleteInvestorMutation();
-   
+
+
+  const sectorMap = useMemo(() => {
+    const flat = Array.isArray(sectorsData?.sectors)
+      ? sectorsData.sectors
+      : sectorsData;
+  
+    return flat.reduce((acc, sector) => {
+      acc[sector._id.toString()] = sector.name;
+      return acc;
+    }, {});
+  }, [sectorsData]);
+  
+  
+    
 
   const handleEdit = (id) => {
     // Navigate to the edit page for the selected investor
@@ -83,24 +99,39 @@ const InvestorsGrid = () => {
     return <Typography color="error">Error loading data: {error.message}</Typography>;
   }
 
-
+ 
   return (
     <div style={{ height: "100vh", width: "100%" }}>
       {isLoading && <div>Loading...</div>}
       {error && <div>Error loading data: {error.message}</div>}
       <DataGrid
-        rows={investors.map((investor) => ({
+       rows={investors.map((investor) => {
+        const sectorNames = Array.isArray(investor.sectors)
+          ? investor.sectors.map((sector) => {
+              const id = typeof sector === "string"
+                ? sector
+                : typeof sector === "object" && sector !== null && sector._id
+                ? sector._id
+                : String(sector); // fallback
+      
+              const label = sectorMap?.[id.toString()];
+              return label || `Unknown (${id})`;
+            }).join(", ")
+          : "N/A";
+          
+          
+        return {
           id: investor._id,
           name: investor.name,
           type: investor.type,
           description:
-            investor.individualDetails?.bio ||
-            investor.institutionDetails?.description,
+            investor.individualDetails?.bio || investor.institutionDetails?.description,
           email: investor.email,
           phoneNumber: investor.phoneNumber,
           totalAmountFunded: investor.totalAmountFunded,
-          sectors: investor.sectors,
-        }))}
+          sectors: sectorNames,
+        };
+      })}
         columns={columns}
         pageSize={10}
         rowsPerPageOptions={[10, 20, 50]}

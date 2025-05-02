@@ -6,6 +6,7 @@ import {
   useDeletesdgFocusMutation,
   useDeleteSectorMutation,
   useDeleteTicketSizeMutation,
+  useDeleteInvestmentAskMutation,
 } from "state/api";
 
 const Tools = ({ data = [], type, loading }) => {
@@ -14,6 +15,7 @@ const Tools = ({ data = [], type, loading }) => {
   const [deleteSector] = useDeleteSectorMutation();
   const [deleteTicket] = useDeleteTicketSizeMutation();
   const [deleteSdgFocus] = useDeletesdgFocusMutation();
+  const [deleteInvestmentAsk] = useDeleteInvestmentAskMutation();
 
   const handleEdit = (id) => {
     navigate(`/tools/update/${type}/${id}`);
@@ -28,6 +30,8 @@ const Tools = ({ data = [], type, loading }) => {
           await deleteTicket(id).unwrap();
         } else if (type === "sdgfocus") {
           await deleteSdgFocus(id).unwrap();
+        } else if (type === "investmentask") {
+          await deleteInvestmentAsk(id).unwrap();
         }
         alert(`${type} deleted successfully`);
       } catch (error) {
@@ -39,7 +43,7 @@ const Tools = ({ data = [], type, loading }) => {
   const columns = [
     {
       field: "mainField",
-      headerName: type === "ticketsize" ? "Range (Min - Max)" : "Name",
+      headerName: type === "ticketsize" || type === "investmentask" ? "Range (Min - Max)" : "Name",
       width: 250,
     },
     {
@@ -54,7 +58,11 @@ const Tools = ({ data = [], type, loading }) => {
       width: 150,
       renderCell: (params) => (
         <Box display="flex" gap={1}>
-          <Button variant="contained" size="small" onClick={() => handleEdit(params.id)}>
+          <Button
+            variant="contained"
+            size="small"
+            onClick={() => handleEdit(params.id)}
+          >
             Edit
           </Button>
           <Button
@@ -72,7 +80,12 @@ const Tools = ({ data = [], type, loading }) => {
 
   if (loading) {
     return (
-      <Box display="flex" justifyContent="center" alignItems="center" minHeight="200px">
+      <Box
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        minHeight="200px"
+      >
         <CircularProgress />
       </Box>
     );
@@ -84,7 +97,7 @@ const Tools = ({ data = [], type, loading }) => {
         rows={data.map((item) => ({
           id: item._id || item.id,
           mainField:
-            type === "ticketsize"
+            type === "ticketsize" || type === "investmentask"
               ? `${item.min} - ${item.max}`
               : item.name,
           description: item.description || "N/A",

@@ -1,23 +1,43 @@
-import React, { useState } from "react";
+import React, { useMemo } from "react";
 import { DataGrid } from "@mui/x-data-grid";
 import { useNavigate } from "react-router-dom";
-import { useTheme, Button, CircularProgress, Box, Typography } from "@mui/material";
-import { useGetCompaniesQuery, useUpdateCompanyMutation, useDeleteCompanyMutation } from "state/api";
+import {
+  useTheme,
+  Button,
+  CircularProgress,
+  Box,
+  Typography,
+} from "@mui/material";
+import {
+  useGetCompaniesQuery,
+  useUpdateCompanyMutation,
+  useDeleteCompanyMutation,
+  useGetSectorQuery,
+} from "state/api";
 
 const CompaniesGrid = () => {
   const theme = useTheme();
   const navigate = useNavigate();
-  
-  // Fetch the companies data
+
   const { data: companies = [], isLoading, error } = useGetCompaniesQuery();
-  
-  // Use RTK Query mutations for delete and update
+  const { data: sectorsData = [] } = useGetSectorQuery();
+
   const [deleteCompany, { isLoading: isDeleting }] = useDeleteCompanyMutation();
-  const [updateCompany] = useUpdateCompanyMutation(); 
+  const [updateCompany] = useUpdateCompanyMutation();
+
+  // 🧠 Map sector ID to name
+  const sectorMap = useMemo(() => {
+    const list = Array.isArray(sectorsData?.sector)
+      ? sectorsData.sector
+      : sectorsData;
+    return list.reduce((acc, sector) => {
+      acc[sector._id] = sector.name;
+      return acc;
+    }, {});
+  }, [sectorsData]);
 
   const handleEdit = (id) => {
-    
-    navigate(`/companies/update/${id}`); 
+    navigate(`/companies/update/${id}`);
   };
 
   const handleDelete = async (id) => {
@@ -26,8 +46,7 @@ const CompaniesGrid = () => {
         await deleteCompany(id).unwrap();
         alert("Company deleted successfully");
       } catch (error) {
-        //console.error("Error deleting company:", error);
-        alert("Failed to delete the company.", error.message);
+        alert("Failed to delete the company: " + error.message);
       }
     }
   };
@@ -35,7 +54,7 @@ const CompaniesGrid = () => {
   const columns = [
     { field: "organizationName", headerName: "Organization", width: 200 },
     { field: "description", headerName: "Description", width: 400 },
-    { field: "industries", headerName: "Industry", width: 200 },
+    { field: "sectors", headerName: "Sectors", width: 250 },
     { field: "location", headerName: "Location", width: 200 },
     { field: "contactEmail", headerName: "Contact Email", width: 250 },
     { field: "fundedDate", headerName: "Founded Date", width: 150 },
@@ -60,25 +79,33 @@ const CompaniesGrid = () => {
   return (
     <Box sx={{ height: "100vh", width: "100%" }}>
       {isLoading && <CircularProgress />}
-      {error && <Typography color="error">Error loading data: {error.message}</Typography>}
+      {error && (
+        <Typography color="error">Error loading data: {error.message}</Typography>
+      )}
       <DataGrid
-        rows={companies.map((company) => ({
-          id: company._id, // Ensures correct ID mapping
-          organizationName: company.organizationName,
-          description: company.description,
-          industries: Array.isArray(company.industries) 
-            ? company.industries.join(", ")  // Safely join if it's an array
-            : company.industries || "N/A", // If it's not an array, display 'N/A' or the value as is
-          location: company.location,
-          contactEmail: company.contactEmail,
-          fundedDate: company.fundedDate
-            ? new Date(company.fundedDate).toLocaleDateString()
-            : "N/A",
-        }))}
+        rows={companies.map((company) => {
+          const sectorNames = Array.isArray(company.sector)
+            ? company.sector
+                .map((sectorId) => sectorMap[sectorId] || `Unknown (${sectorId})`)
+                .join(", ")
+            : "N/A";
+
+          return {
+            id: company._id,
+            organizationName: company.organizationName,
+            description: company.description,
+            sectors: sectorNames,
+            location: company.location,
+            contactEmail: company.contactEmail,
+            fundedDate: company.fundedDate
+              ? new Date(company.fundedDate).toLocaleDateString()
+              : "N/A",
+          };
+        })}
         columns={columns}
         pageSize={10}
         rowsPerPageOptions={[10, 20, 50]}
-        loading={isLoading || isDeleting}  // Show loading while fetching or deleting
+        loading={isLoading || isDeleting}
         checkboxSelection
         disableSelectionOnClick
       />

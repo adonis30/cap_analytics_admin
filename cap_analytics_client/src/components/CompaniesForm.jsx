@@ -36,6 +36,8 @@ import {
   useInitiateUploadMutation,
   useGetCompanyByIdQuery,
   useGetsdgFocusQuery,
+  useGetInvestmentAskQuery,
+  useGetSectorQuery,
 } from "state/api";
 import { useNavigate } from "react-router-dom";
 import MultiSelectDropdown from "./MultiSelectDropdown";
@@ -44,9 +46,7 @@ import MultiSelectDropdown from "./MultiSelectDropdown";
 const schema = yup.object().shape({
   organizationName: yup.string().required("Company name is required"),
   description: yup.string().required("Description is required"),
-  industries: yup.array().of(yup.string()).required(),
-  categories: yup.array().of(yup.string()).required(),
-  fundingTypes: yup.array().of(yup.string()).required(),
+  sector: yup.array().of(yup.string()).required(),
   fundingRounds: yup.array().of(yup.string()).required(),
   fundingInstruments: yup.array().of(yup.string()).required(),
   contactNumber: yup.string(),
@@ -73,13 +73,6 @@ const schema = yup.object().shape({
   annualRevenue: yup.number().nullable(),
 });
 
-const investorAsk = [
-  { value: "0 - 50000", label: "<=50000" },
-  { value: "50000 - 100000", label: "50000 <= 100000" },
-  { value: "100000 - 500000", label: "100000 <=500000" },
-  { value: ">500000", label: ">500000" },
-];
-
 const CompaniesForm = ({ company, companyId }) => {
   const {
     data: company1,
@@ -90,12 +83,10 @@ const CompaniesForm = ({ company, companyId }) => {
   const navigate = useNavigate();
 
   // Fetch data from APIs
-  const { data: categoriesData, isLoading: categoriesLoading } =
-    useGetCategoriesQuery();
+   
   const { data: fundingRoundsData, isLoading: fundingRoundsLoading } =
     useGetFundingRoundsQuery();
-  const { data: fundingTypesData, isLoading: fundingTypesLoading } =
-    useGetFundingTypesQuery();
+  
 
   const { data: fundingInstrumentsData, isLoading: fundingInstrumentsLoading } =
     useGetFundingInstrumentsQuery();
@@ -103,10 +94,15 @@ const CompaniesForm = ({ company, companyId }) => {
   const { data: sdgFocusData, isLoading: sdgFocusLoading } =
     useGetsdgFocusQuery();
 
+  const { data: investmentAskData = [] } = useGetInvestmentAskQuery();
+
+  const { data: sectorsData = [] } = useGetSectorQuery();
+
+   
+
   const [initiateUpload] = useInitiateUploadMutation();
 
-  const [createCategory] = useCreateCategoryMutation();
-  const [createFundingType] = useCreateFundingTypeMutation();
+   
   const [createFundingRound] = useCreateFundingRoundMutation();
   const [createFundingInstrument] = useCreateFundingInstrumentMutation();
   const [createCompany] = useCreateCompanyMutation();
@@ -122,14 +118,12 @@ const CompaniesForm = ({ company, companyId }) => {
   const defaultValues = {
     organizationName: company?.organizationName || "",
     description: company?.description || "",
-    industries: company?.industries || [],
+    sector: company?.sector || [],
     location: company?.location || "",
     contactNumber: company?.contactNumber || "",
     contactEmail: company?.contactEmail || "",
     fundedDate: company?.fundedDate || null,
     imageUrl: company?.imageUrl || "",
-    categories: company?.categories || [],
-    fundingTypes: company?.fundingTypes || [],
     fundingRounds: company?.fundingRounds || [],
     fundingInstruments: company?.fundingInstruments || [],
     operatingStatus: company?.operatingStatus || "Active",
@@ -171,20 +165,18 @@ const CompaniesForm = ({ company, companyId }) => {
         url,
         imageUrl,
         fundedDate,
-        categories,
         fundingRounds,
         fundingTypes,
         fundingInstruments,
         owners,
         operatingStatus,
         sdgFocus,
-        industries,
+        sector,
         investmentAsk,
         businessGrowthStage,
         yearsInOperation,
         annualExpenditure,
         annualRevenue,
-
       } = company1;
 
       reset({
@@ -196,22 +188,16 @@ const CompaniesForm = ({ company, companyId }) => {
         url,
         owners,
         operatingStatus,
-        industries: company1?.industries || [], // Assuming industries is an array
+        sector: company1?.sector || [], // Assuming industries is an array
         imageUrl: imageUrl ?? "", // for validation purposes
         fundedDate: fundedDate ? dayjs(fundedDate) : null,
 
-        categories: (categories ?? []).map((c) =>
-          typeof c === "string" ? c : c._id
-        ),
-
         fundingRounds: fundingRounds ?? [],
-        fundingTypes: (fundingTypes ?? []).map((ft) =>
-          typeof ft === "string" ? ft : ft._id
-        ),
+        
         sdgFocus: (sdgFocus ?? []).map((s) =>
           typeof s === "string" ? s : s._id
         ),
-        investmentAsk: investmentAsk ?? "",
+        investmentAsk: investmentAsk || "",
         yearsInOperation: yearsInOperation ?? null,
         annualExpenditure: annualExpenditure ?? null,
         annualRevenue: annualRevenue ?? null,
@@ -232,12 +218,15 @@ const CompaniesForm = ({ company, companyId }) => {
   const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 
   // Watch selected dropdown values
-  const selectedCategories = watch("categories");
-  const selectedFundingTypes = watch("fundingTypes");
-  const selectedIndustries = watch("industries");
+   
   const selectedFundingRounds = watch("fundingRounds");
   const selectedFundingInstruments = watch("fundingInstruments");
   const selectedSDGFocus = watch("sdgFocus");
+
+  const investmentAskValue = watch("investmentAsk");
+  const investmentAskValid = investmentAskData.some(
+    (item) => item._id === investmentAskValue
+  );
 
   // ✅ Handle Adding New Values Dynamically
   const handleAddOption = async (createFn, inputValue, optionType) => {
@@ -260,14 +249,7 @@ const CompaniesForm = ({ company, companyId }) => {
         }))
       : [];
 
-  const categoryOptions =
-    Array.isArray(categoriesData?.categories) &&
-    categoriesData.categories.length > 0
-      ? categoriesData.categories.map((c) => ({
-          value: c._id,
-          label: c.name,
-        }))
-      : [];
+  
 
   const sdgFocusOptions =
     Array.isArray(sdgFocusData?.sdgFocus) && sdgFocusData.sdgFocus.length > 0
@@ -276,6 +258,13 @@ const CompaniesForm = ({ company, companyId }) => {
           label: s.name,
         }))
       : [];
+      const selectedSectorsOptions =
+      Array.isArray(sectorsData?.sectors) && sectorsData.sectors.length > 0
+        ? sectorsData.sectors.map((s) => ({
+            value: s._id,
+            label: s.name,
+          }))
+        : [];  
 
   const getDefaultMultiSelectValues = (selected = [], options = []) => {
     if (!Array.isArray(selected)) return [];
@@ -292,21 +281,16 @@ const CompaniesForm = ({ company, companyId }) => {
     return options.filter((opt) => selectedIds.includes(String(opt.value)));
   };
 
-  const fundingTypeOptions = useMemo(() => {
-    return (
-      fundingTypesData?.map((ft) => ({
-        value: ft._id,
-        label: ft.name,
-      })) ?? []
-    );
-  }, [fundingTypesData]);
+  
 
-  const selectedFundingTypeValues = useMemo(() => {
-    return getDefaultMultiSelectValues(
-      watch("fundingTypes"),
-      fundingTypeOptions
-    );
-  }, [watch("fundingTypes"), fundingTypeOptions]);
+  const investmentAskOptions =
+    Array.isArray(investmentAskData) && investmentAskData.length > 0
+      ? investmentAskData.map((ia) => ({
+          value: ia._id,
+          label: `${ia.min} - ${ia.max}`,
+        }))
+      : [];
+   
 
   const handleDropdownChange = (values, key) => {
     if (!Array.isArray(values)) return;
@@ -316,22 +300,10 @@ const CompaniesForm = ({ company, companyId }) => {
     setValue(key, selectedIds, { shouldValidate: true, shouldDirty: true });
   };
 
-  useEffect(() => {
-    const selectedIds = watch("categories").map((c) =>
-      typeof c === "string" ? c : c.value
-    );
-    const optionIds = categoryOptions.map((opt) => opt.value);
+  
 
-    const matched = categoryOptions.filter((opt) =>
-      selectedIds.includes(String(opt.value))
-    );
-  }, [watch("categories"), categoryOptions]);
-
-  // Watch selected categories and update industries in the background
-  useEffect(() => {
-    setValue("industries", selectedCategories); // Sync selectedCategories to industries without rendering
-  }, [selectedCategories, setValue]);
-
+  
+   
   const handleImageChange = (event) => {
     const file = event.target.files[0];
     if (file) {
@@ -350,8 +322,9 @@ const CompaniesForm = ({ company, companyId }) => {
     }
   };
 
+ 
   const onSubmit = async (values) => {
-    
+   console.log("data", values)
     setIsSubmitting(true);
 
     try {
@@ -426,8 +399,7 @@ const CompaniesForm = ({ company, companyId }) => {
 
   if (
     fundingRoundsLoading ||
-    fundingTypesLoading ||
-    categoriesLoading ||
+     
     fundingInstrumentsLoading
   ) {
     // Show loader until all data is fetched
@@ -464,27 +436,20 @@ const CompaniesForm = ({ company, companyId }) => {
             </Grid>
 
             <Grid item xs={12} md={4}>
-              {categoriesData.length > 0 ? (
-                <MultiSelectDropdown
-                  options={
-                    categoriesData?.map((c) => ({
-                      value: c._id,
-                      label: c.name,
-                    })) ?? []
-                  }
-                  defaultValue={selectedCategories ?? []}
-                  onChange={(values) =>
-                    handleDropdownChange(values, "categories")
-                  }
-                  placeholder="Select Categories"
-                  createOption={(inputValue) =>
-                    handleAddOption(createCategory, inputValue, "Category")
-                  }
-                />
-              ) : (
-                <Typography>Loading categories...</Typography> // Or a loading spinner
-              )}
-            </Grid>
+            <MultiSelectDropdown
+              options={
+                selectedSectorsOptions.length > 0
+                  ? selectedSectorsOptions
+                  : (sectorsData?.map((s) => ({
+                      value: s._id,
+                      label: s.name,
+                    })) ?? [])
+              }
+              defaultValue={watch("sector")}
+              onChange={(values) => handleDropdownChange(values, "sector")}
+              placeholder="Select Sectors"
+            />
+          </Grid>
 
             <Grid item xs={12} md={4}>
               <TextField
@@ -544,24 +509,18 @@ const CompaniesForm = ({ company, companyId }) => {
                 select
                 fullWidth
                 label="Investment Ask"
+                value={investmentAskValid ? investmentAskValue : ""}
                 {...register("investmentAsk")}
-                value={watch("investmentAsk") || ""} // guard against undefined
                 error={!!errors.investmentAsk}
                 helperText={errors.investmentAsk?.message}
               >
-                {[
-                  { value: "0 - 50000", label: "≤ 50 000" },
-                  { value: "50000 - 100000", label: "50 000–100 000" },
-                  { value: "100000 - 500000", label: "100 000–500 000" },
-                  { value: ">500000", label: "> 500 000" },
-                ].map(({ value, label }) => (
-                  <MenuItem key={value} value={value}>
-                    {label}
+                {investmentAskOptions.map((item) => (
+                  <MenuItem key={item.value} value={item.value}>
+                    {item.label}
                   </MenuItem>
                 ))}
               </TextField>
             </Grid>
-
             {/* Business Growth Stage */}
             <Grid item xs={12} md={4}>
               <TextField
@@ -643,7 +602,7 @@ const CompaniesForm = ({ company, companyId }) => {
               />
             </Grid>
 
-           {/*  <Grid item xs={12} md={4}>
+            {/*  <Grid item xs={12} md={4}>
               <MultiSelectDropdown
                 options={fundingTypeOptions}
                 defaultValue={selectedFundingTypes}

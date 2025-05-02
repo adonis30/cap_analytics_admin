@@ -513,4 +513,9 @@ export const {
   useCreateTicketSizeMutation,
   useUpdateTicketSizeMutation,
   useDeleteTicketSizeMutation,
+  useGetInvestmentAskQuery,
+  useCreateInvestmentAskMutation,
+  useDeleteInvestmentAskMutation,
+  useGetInvestmentAskByIdQuery,
+  useUpdateInvestmentAskMutation,
 } = api;

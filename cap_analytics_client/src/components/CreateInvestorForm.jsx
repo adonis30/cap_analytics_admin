@@ -303,7 +303,7 @@ const CreateInvestorForm = ({ investor, investorId }) => {
 
   const ticketSizeValue = watch("ticketSize");
   const ticketSizeValid = ticketSizeData.some(
-    (item) => item.number === ticketSizeValue
+    (item) => item._id === ticketSizeValue
   );
 
   const fundingRoundOptions =
@@ -324,11 +324,10 @@ const CreateInvestorForm = ({ investor, investorId }) => {
       : [];
 
   const ticketSizeOptions =
-    Array.isArray(ticketSizeData?.ticketSize) &&
-    ticketSizeData.ticketSize.length > 0
-      ? ticketSizeData.ticketSize.map((ts) => ({
+    Array.isArray(ticketSizeData) && ticketSizeData.length > 0
+      ? ticketSizeData.map((ts) => ({
           value: ts._id,
-          label: ts.number,
+          label: `${ts.min} - ${ts.max}`,
         }))
       : [];
 
@@ -411,7 +410,7 @@ const CreateInvestorForm = ({ investor, investorId }) => {
 
   const onSubmit = async (data) => {
     setIsSubmitting(true);
-     
+
     try {
       // 🧠 Determine which image field to update
       const imageField =
@@ -599,9 +598,9 @@ const CreateInvestorForm = ({ investor, investorId }) => {
               error={!!errors.ticketSize}
               helperText={errors.ticketSize?.message}
             >
-              {ticketSizeData.map((item) => (
-                <MenuItem key={item.number} value={item.number}>
-                  {item.number}
+              {ticketSizeOptions.map((item) => (
+                <MenuItem key={item.value} value={item.value}>
+                  {item.label}
                 </MenuItem>
               ))}
             </TextField>

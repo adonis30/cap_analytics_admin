@@ -31,7 +31,7 @@ import CreateInvestorPage from "scenes/investors/create";
 import EditInvestor from "scenes/investors/[id]/update";
 import SdgFocusOverview from "scenes/sdgfocus";
 import ToolsOverview from "scenes/tools";
-import { CreateSdgFocus, CreateSector, CreateTicketSize, EditSdgFocus, EditSector, EditTicketSize } from "scenes/tools/create";
+import { CreateInvestmentAsk, CreateSdgFocus, CreateSector, CreateTicketSize, EditInvestmentAsk, EditSdgFocus, EditSector, EditTicketSize } from "scenes/tools/create";
 
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated } = useAuthStore();
@@ -119,6 +119,8 @@ function App() {
               <Route path="/tools/create/sector" element={<CreateSector />} />
               <Route path="/tools/create/sdgfocus" element={<CreateSdgFocus />} />
               <Route path="/tools/create/ticketsize" element={<CreateTicketSize />} />
+              <Route path="/tools/create/investmentask" element={<CreateInvestmentAsk />} />
+              <Route path="/tools/update/investmentask" element={<EditInvestmentAsk />} />
               <Route path="/tools/update/sector/:id" element={<EditSector />} />
               <Route path="/tools/update/sdgfocus/:id" element={<EditSdgFocus />} />
               <Route path="/tools/update/ticketsize/:id" element={<EditTicketSize />} />
