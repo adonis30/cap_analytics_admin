@@ -67,7 +67,7 @@ export const createCompany = async (req, res) => {
         return res.status(400).json({ message: "Invalid request: Missing company data." });
     }
 
-    const { boardMembers = [], organizationName, description, industries, location, imageUrl, ...rest } = company;
+    const { boardMembers = [], organizationName, description, sector, location, imageUrl, ...rest } = company;
 
     try {
         // ✅ Ensure `member` inside `boardMembers` is a valid ObjectId
@@ -84,7 +84,7 @@ export const createCompany = async (req, res) => {
         const newCompany = new Company({
             organizationName,
             description,
-            industries,
+            sector,
             location,
             imageUrl,
             boardMembers: validatedBoardMembers, // Use validated board members
@@ -103,6 +103,7 @@ export const createCompany = async (req, res) => {
 
 // Update an existing company
 export const updateCompany = async (req, res) => {
+    
     const { companyId } = req.params;
     
     try {

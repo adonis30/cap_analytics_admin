@@ -6,7 +6,7 @@ const CompanySchema = new Schema(
   {
     organizationName: { type: String, required: true, trim: true },
     description: { type: String, trim: true },
-    industries: [{ type: String, trim: true }], // Now an array
+    sector: [{ type: String, trim: true }], // Now an array
     owners: { type: String, trim: true }, // Array of user references
     rankCompany: { type: Number, default: 0 }, // Changed to Number
     operatingStatus: {
@@ -44,7 +44,7 @@ const CompanySchema = new Schema(
     annualRevenue: { type: Number },
     investmentAsk: {
       type: String,
-      enum: ["0 - 50000", "50000 - 100000", "100000 - 500000", ">500000"],
+       
     },
     sdgFocus: [{ type: String }],
     businessGrowthStage: {

@@ -8,7 +8,7 @@ import Company from "../models/Companies.js";
  */
 export const getAllInvestors = async (req, res) => {
   try {
-    console.log("Fetching investors...");
+    
 
     const individualInvestors = await IndividualInvestor.find();
     const institutionInvestors = await InstitutionInvestor.find();
