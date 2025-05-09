@@ -82,7 +82,7 @@ const ToolsForm = ({
       </Typography>
 
       <form onSubmit={handleSubmit(onSubmit)}>
-        {title === "Ticket Size" || "Investment Ask" ? (
+        {title === "Ticket Size" || title === "Investment Ask" ? (
           <>
             <TextField
               label="Min Amount"
@@ -139,7 +139,7 @@ const ToolsForm = ({
               <TableHead>
                 <TableRow>
                   <TableCell>
-                    {title === "Ticket Size" || "Investment Ask"
+                    {title === "Ticket Size" || title === "Investment Ask"
                       ? "Amount"
                       : "Name"}
                   </TableCell>

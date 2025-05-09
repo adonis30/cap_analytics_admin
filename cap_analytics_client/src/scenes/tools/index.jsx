@@ -20,7 +20,7 @@ const ToolsOverview = () => {
   const { data: sdgFocus, isLoading: loadingSdgFocus } = useGetsdgFocusQuery();
   const { data: investmentAsks, isLoading: loadingInvestmentAsks } = useGetInvestmentAskQuery(); // ✅
 
-  const handleCreate = (type: string) => {
+  const handleCreate = (type) => {
     navigate(`/tools/create/${type}`);
   };
 
