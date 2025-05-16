@@ -1,12 +1,12 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
-import { Box, CircularProgress, Typography } from '@mui/material';
+import { Box, CircularProgress} from '@mui/material';
 import { useGetInvestorByIdQuery } from 'state/api';
 import CreateInvestorForm from 'components/CreateInvestorForm';
 
 function EditInvestor() {
   const { id } = useParams();
-  const { data: investor, isLoading, error } = useGetInvestorByIdQuery(id);
+  const { data: investor, isLoading} = useGetInvestorByIdQuery(id);
 
   if (isLoading) {
     return (
