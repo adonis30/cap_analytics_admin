@@ -13,7 +13,7 @@ const employeeSchema = new Schema(
       unique: true,
       match: /^\S+@\S+\.\S+$/, // Validate email format
     },
-    phoneNumbers: { type: [String], required: true },
+    phoneNumbers: { type: String, required: true },
     organizationId: { type: Schema.Types.ObjectId, ref: 'Organization', required: true },
     position: { type: String, required: true },
     department: { type: String }, // Optional department

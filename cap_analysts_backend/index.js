@@ -63,12 +63,13 @@ app.use("/api/v1/investors", investorRoutes);
 app.use("/api/v1/fundings", fundingRoutes);
 app.use("/api/v1/user", userRoutes);
 app.use("/api/v1/auth", authRouter);
-app.use("/api/v1/people", peopleRoutes);
+app.use("/api/v1/employees", peopleRoutes);
 app.use("/api/v1/upload", uploadRoutes);
 app.use("/api/v1/sdgFocus", sdgFocusRoutes);
 app.use("/api/v1/sectors", sector);
 app.use("/api/v1/ticketSize", ticketSize);
 app.use("/api/v1/investmentAsk", investmentAsk);
+
 
 
 // Use image routes

@@ -1,4 +1,4 @@
-import TicketSize from "../models/TicketSize.js";
+import TicketSize from "../models/ticketSize.js"
 
 export const getAllTicketSizes = async (req, res) => {
   try {

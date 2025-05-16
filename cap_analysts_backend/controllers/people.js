@@ -1,11 +1,22 @@
 import Employee from "../models/People.js";
 
+
+
 // Create a new employee
 export const createEmployee = async (req, res) => {
+   
   try {
-    const employee = await Employee.create(req.body);
+    const employee = await Employee.create(req.body.data);
     res.status(201).json({ success: true, data: employee });
   } catch (error) {
+    console.error("Employee creation failed:", error); // Add this line
+    if (error.name === "ValidationError") {
+      return res.status(400).json({
+        success: false,
+        message: "Validation failed",
+        errors: Object.values(error.errors).map((e) => e.message),
+      });
+    }
     res.status(400).json({ success: false, message: error.message });
   }
 };
@@ -35,8 +46,9 @@ export const getEmployeeById = async (req, res) => {
 
 // Update an employee by ID
 export const updateEmployee = async (req, res) => {
+   
   try {
-    const employee = await Employee.findByIdAndUpdate(req.params.id, req.body, {
+    const employee = await Employee.findByIdAndUpdate(req.body.employeeId, req.body.data, {
       new: true, // Return the updated document
       runValidators: true, // Run validation on updates
     });
