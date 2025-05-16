@@ -1,26 +1,23 @@
-import * as React from 'react';
-import { useColorScheme } from '@mui/material/styles';
-import MenuItem from '@mui/material/MenuItem';
-import Select, { SelectProps } from '@mui/material/Select';
+import React from "react";
+import MenuItem from "@mui/material/MenuItem";
+import Select from "@mui/material/Select";
 
-export default function ColorModeSelect(props: SelectProps) {
-  const { mode, setMode } = useColorScheme();
-  if (!mode) {
-    return null;
-  }
+interface ColorModeSelectProps {
+  mode: "light" | "dark";
+  setMode: (mode: "light" | "dark") => void;
+}
+
+export default function ColorModeSelect({ mode, setMode }: ColorModeSelectProps) {
   return (
     <Select
       value={mode}
-      onChange={(event) =>
-        setMode(event.target.value as 'system' | 'light' | 'dark')
-      }
+      onChange={(e) => setMode(e.target.value as "light" | "dark")}
       SelectDisplayProps={{
-        // @ts-ignore
-        'data-screenshot': 'toggle-mode',
+        "data-screenshot": "toggle-mode",
       }}
-      {...props}
+      size="small"
+      sx={{ width: 120 }}
     >
-      <MenuItem value="system">System</MenuItem>
       <MenuItem value="light">Light</MenuItem>
       <MenuItem value="dark">Dark</MenuItem>
     </Select>
