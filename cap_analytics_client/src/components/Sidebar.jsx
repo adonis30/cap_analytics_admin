@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   Box,
   Divider,
@@ -27,81 +27,21 @@ import {
   AdminPanelSettingsOutlined,
   TrendingUpOutlined,
   PieChartOutlined,
+  ExpandLess,
+  ExpandMore,
 } from "@mui/icons-material";
-import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import FlexBetween from "./FlexBetween";
 import profileImage from "assets/profile.jpeg";
 import { useAuthStore } from "store/authStore";
- 
-const navItems = [
-  {
-    text: "Dashboard",
-    icon: <HomeOutlined />,
-  },
-  {
-    text: "Client Facing",
-    icon: null,
-  },
-  {
-    text: "Companies",
-    icon: <ShoppingCartOutlined />,
-  },
-  {
-    text: "Investors",
-    icon: <Groups2Outlined />,
-  },
-  {
-    text: "Users",
-    icon: <GroupAddOutlined />,
-  },
-  {
-    text: "Fundings",
-    icon: <PublicOutlined />,
-  },
-  
-  {
-    text: "Deals and tools",
-    icon: null,
-  },
-  {
-    text: "tools",
-    icon: <PointOfSaleOutlined />,
-  },
-  {
-    text: "Daily",
-    icon: <TodayOutlined />,
-  },
-  {
-    text: "Monthly",
-    icon: <CalendarMonthOutlined />,
-  },
-  {
-    text: "Breakdown",
-    icon: <PieChartOutlined />,
-  },
-  {
-    text: "Management",
-    icon: null,
-  },
-  {
-    text: "Admin",
-    icon: <AdminPanelSettingsOutlined />,
-  },
-  {
-    text: "Performance",
-    icon: <TrendingUpOutlined />,
-  },
-];
 
-const Sidebar = ({
-  drawerWidth,
-  isSidebarOpen,
-  setIsSidebarOpen,
-  isNonMobile,
-}) => {
+const Sidebar = ({ drawerWidth, isSidebarOpen, setIsSidebarOpen, isNonMobile }) => {
   const { pathname } = useLocation();
   const [active, setActive] = useState("");
+  const [clientFacingOpen, setClientFacingOpen] = useState(false);
+  const [dealsToolsOpen, setDealsToolsOpen] = useState(false);
+  const [managementOpen, setManagementOpen] = useState(false);
+
   const navigate = useNavigate();
   const theme = useTheme();
   const { user } = useAuthStore();
@@ -110,125 +50,192 @@ const Sidebar = ({
     setActive(pathname.substring(1));
   }, [pathname]);
 
+  const handleNavigate = (path) => {
+    navigate(`/${path}`);
+    setActive(path);
+  };
+
+  const renderNavItems = (items, paddingLeft = 4) =>
+    items.map(({ text, icon }) => {
+      const lcText = text.toLowerCase();
+      return (
+        <ListItem key={text} disablePadding>
+          <ListItemButton
+            onClick={() => handleNavigate(lcText)}
+            sx={{
+              backgroundColor: active === lcText ? theme.palette.secondary[300] : "transparent",
+              color: active === lcText ? theme.palette.primary[600] : theme.palette.secondary[100],
+              pl: paddingLeft,
+            }}
+          >
+            <ListItemIcon
+              sx={{
+                color: active === lcText ? theme.palette.primary[600] : theme.palette.secondary[200],
+              }}
+            >
+              {icon}
+            </ListItemIcon>
+            <ListItemText primary={text} />
+            {active === lcText && <ChevronRightOutlined sx={{ ml: "auto" }} />}
+          </ListItemButton>
+        </ListItem>
+      );
+    });
+
   return (
     <Box component="nav">
-  {isSidebarOpen && (
-    <Drawer
-      open={isSidebarOpen}
-      onClose={() => setIsSidebarOpen(false)}
-      variant="persistent"
-      anchor="left"
-      sx={{
-        width: drawerWidth,
-        "& .MuiDrawer-paper": {
-          color: theme.palette.secondary[200],
-          backgroundColor: theme.palette.background.alt,
-          boxSizing: "border-box",
-          borderWidth: isNonMobile ? 0 : "2px",
-          width: drawerWidth,
-        },
-      }}
-    >
-      <Box width="100%">
-        {/* Header */}
-        <Box m="1.5rem 2rem 2rem 3rem">
-          <FlexBetween color={theme.palette.secondary.main}>
-            <Box display="flex" alignItems="center" gap="0.5rem">
-              <Typography variant="h4" fontWeight="bold">
-                CAP-ANALYTICS
-              </Typography>
-            </Box>
-            {!isNonMobile && (
-              <IconButton onClick={() => setIsSidebarOpen(!isSidebarOpen)}>
-                <ChevronLeft />
-              </IconButton>
-            )}
-          </FlexBetween>
-        </Box>
-
-        {/* Navigation List */}
-        <List>
-          {navItems.map(({ text, icon }) => {
-            if (!icon) {
-              return (
-                <Typography key={text} sx={{ m: "2.25rem 0 1rem 3rem" }}>
-                  {text}
+      {isSidebarOpen && (
+        <Drawer
+          open={isSidebarOpen}
+          onClose={() => setIsSidebarOpen(false)}
+          variant="persistent"
+          anchor="left"
+          sx={{
+            width: drawerWidth,
+            "& .MuiDrawer-paper": {
+              color: theme.palette.secondary[200],
+              backgroundColor: theme.palette.background.alt,
+              boxSizing: "border-box",
+              borderWidth: isNonMobile ? 0 : "2px",
+              width: drawerWidth,
+            },
+          }}
+        >
+          <Box width="100%">
+            {/* Header */}
+            <Box m="1.5rem 2rem 2rem 3rem">
+              <FlexBetween color={theme.palette.secondary.main}>
+                <Typography variant="h4" fontWeight="bold">
+                  CAP-ANALYTICS
                 </Typography>
-              );
-            }
-            const lcText = text.toLowerCase();
+                {!isNonMobile && (
+                  <IconButton onClick={() => setIsSidebarOpen(false)}>
+                    <ChevronLeft />
+                  </IconButton>
+                )}
+              </FlexBetween>
+            </Box>
 
-            return (
-              <ListItem key={text} disablePadding>
+            <List>
+              {/* Dashboard */}
+              <ListItem disablePadding>
                 <ListItemButton
-                  onClick={() => {
-                    navigate(`/${lcText}`)
-                    setActive(lcText);
-                  }}
+                  onClick={() => handleNavigate("dashboard")}
                   sx={{
-                    backgroundColor:
-                      active === lcText
-                        ? theme.palette.secondary[300]
-                        : "transparent",
-                    color:
-                      active === lcText
-                        ? theme.palette.primary[600]
-                        : theme.palette.secondary[100],
+                    backgroundColor: active === "dashboard" ? theme.palette.secondary[300] : "transparent",
+                    color: active === "dashboard" ? theme.palette.primary[600] : theme.palette.secondary[100],
                   }}
                 >
                   <ListItemIcon
                     sx={{
                       ml: "2rem",
-                      color:
-                        active === lcText
-                          ? theme.palette.primary[600]
-                          : theme.palette.secondary[200],
+                      color: active === "dashboard" ? theme.palette.primary[600] : theme.palette.secondary[200],
                     }}
                   >
-                    {icon}
+                    <HomeOutlined />
                   </ListItemIcon>
-                  <ListItemText primary={text} />
-                  {active === lcText && (
-                    <ChevronRightOutlined sx={{ ml: "auto" }} />
-                  )}
+                  <ListItemText primary="Dashboard" />
+                  {active === "dashboard" && <ChevronRightOutlined sx={{ ml: "auto" }} />}
                 </ListItemButton>
               </ListItem>
-            );
-          })}
-        </List>
-      </Box>
 
-      <Box position='absolute' bottom='2rem'>
-        <Divider />
-        <FlexBetween textTransform='none' gap='1rem' m='1.5rem 2rem 0 3rem'>
-        <Box
-         component="img"
-         alt="profile"
-         src={user?.photo || profileImage}
-         height="40px"
-         width="40px"
-         borderRadius="50%" // Correct property for rounding
-         sx={{ objectFit: "cover" }}
-         />
+              {/* Client Facing */}
+              <ListItem disablePadding>
+                <ListItemButton onClick={() => setClientFacingOpen(!clientFacingOpen)}>
+                  <ListItemText
+                    primary="Client Facing"
+                    sx={{ pl: "2rem", color: theme.palette.secondary[100] }}
+                  />
+                  {clientFacingOpen ? <ExpandLess /> : <ExpandMore />}
+                </ListItemButton>
+              </ListItem>
+              {clientFacingOpen &&
+                renderNavItems(
+                  [
+                    { text: "Companies", icon: <ShoppingCartOutlined /> },
+                    { text: "Investors", icon: <Groups2Outlined /> },
+                    { text: "Users", icon: <GroupAddOutlined /> },
+                    { text: "Fundings", icon: <PublicOutlined /> },
+                    { text: "Employees", icon: <GroupAddOutlined /> },
+                    { text: "BoardMembers", icon: <GroupAddOutlined /> },
+                  ],
+                  4
+                )}
 
-             <Box textAlign='left'>
-                <Typography fontWeight="bold" fontSize="0.7rem" sx={{ color: theme.palette.secondary[100] }}>
-                    {user.firstName + ' ' + user.lastName}
-                </Typography>
-                <Typography  fontSize="0.7rem" sx={{ color: theme.palette.secondary[200] }}>
-                    {user.role}
-                </Typography>
-             </Box>
-             <SettingsOutlined 
-             sx={{ color: theme.palette.secondary[300], fontSize: '22px' }}
-             />
+              {/* Deals and Tools */}
+              <ListItem disablePadding>
+                <ListItemButton onClick={() => setDealsToolsOpen(!dealsToolsOpen)}>
+                  <ListItemText
+                    primary="Deals and Tools"
+                    sx={{ pl: "2rem", color: theme.palette.secondary[100] }}
+                  />
+                  {dealsToolsOpen ? <ExpandLess /> : <ExpandMore />}
+                </ListItemButton>
+              </ListItem>
+              {dealsToolsOpen &&
+                renderNavItems(
+                  [
+                    { text: "tools", icon: <PointOfSaleOutlined /> },
+                    { text: "Daily", icon: <TodayOutlined /> },
+                    { text: "Monthly", icon: <CalendarMonthOutlined /> },
+                    { text: "Breakdown", icon: <PieChartOutlined /> },
+                  ],
+                  4
+                )}
+
+              {/* Management */}
+              <ListItem disablePadding>
+                <ListItemButton onClick={() => setManagementOpen(!managementOpen)}>
+                  <ListItemText
+                    primary="Management"
+                    sx={{ pl: "2rem", color: theme.palette.secondary[100] }}
+                  />
+                  {managementOpen ? <ExpandLess /> : <ExpandMore />}
+                </ListItemButton>
+              </ListItem>
+              {managementOpen &&
+                renderNavItems(
+                  [
+                    { text: "Admin", icon: <AdminPanelSettingsOutlined /> },
+                    { text: "Performance", icon: <TrendingUpOutlined /> },
+                  ],
+                  4
+                )}
+            </List>
+          </Box>
+
+          {/* Footer */}
+          <Box position="absolute" bottom="2rem">
             
-        </FlexBetween>
-      </Box>
-    </Drawer>
-  )}
-</Box>
-
+            <Divider />
+            <FlexBetween textTransform="none" gap="1rem" m="1.5rem 2rem 0 3rem">
+              <Box
+                component="img"
+                alt="profile"
+                src={user?.photo || profileImage}
+                height="50px"
+                width="50px"
+                borderRadius="50%"
+                sx={{ objectFit: "cover" }}
+              />
+              <Box textAlign="left">
+                <Typography
+                  fontWeight="bold"
+                  fontSize="0.9rem"
+                  sx={{ color: theme.palette.secondary[100] }}
+                >
+                  {user.firstName + " " + user.lastName}
+                </Typography>
+                <Typography fontSize="0.8rem" sx={{ color: theme.palette.secondary[200] }}>
+                  {user.role}
+                </Typography>
+              </Box>
+              <SettingsOutlined sx={{ color: theme.palette.secondary[300], fontSize: "25px" }} />
+            </FlexBetween>
+          </Box>
+        </Drawer>
+      )}
+    </Box>
   );
 };
 

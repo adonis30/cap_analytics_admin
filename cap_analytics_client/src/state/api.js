@@ -391,6 +391,7 @@ export const api = createApi({
         url: `${url}general/boardMembers`,
         method: 'POST',
         body: newMember,
+
       }),
       invalidatesTags: ['BoardMember'],
     }),
@@ -409,6 +410,40 @@ export const api = createApi({
       }),
       invalidatesTags: ['BoardMember'],
     }),
+
+    // CRUD for Employees
+    getEmployees: build.query({
+      query: () => `${url}employees/`,
+      providesTags: ['Employee'],
+    }),
+    getEmployeeById: build.query({
+      query: (id) => `${url}employees/${id}`,
+      providesTags: (result, error, id) => [{ type: 'Employee', id }],
+    }),
+    createEmployee: build.mutation({
+      query: (data) => ({
+        url: `${url}employees/`,
+        method: 'POST',
+        body: data,
+      }),
+      invalidatesTags: ['Employee'],
+    }),
+    updateEmployee: build.mutation({
+      query: ({ id, ...updatedData }) => ({
+        url: `${url}employees/${id}`,
+        method: 'PUT',
+        body: updatedData,
+      }),
+      invalidatesTags: (result, error, { id }) => [{ type: 'Employee', id }],
+    }),
+    deleteEmployee: build.mutation({
+      query: (id) => ({
+        url: `${url}employees/${id}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ['Employee'],
+    }),
+
     // Category Endpoints
     getCategories: build.query({
       query: () => `${url}categories/`,
@@ -518,4 +553,9 @@ export const {
   useDeleteInvestmentAskMutation,
   useGetInvestmentAskByIdQuery,
   useUpdateInvestmentAskMutation,
+  useGetEmployeesQuery,
+  useGetEmployeeByIdQuery,
+  useCreateEmployeeMutation,
+  useUpdateEmployeeMutation,
+  useDeleteEmployeeMutation,
 } = api;
