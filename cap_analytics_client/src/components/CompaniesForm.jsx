@@ -324,7 +324,7 @@ const CompaniesForm = ({ company, companyId }) => {
 
  
   const onSubmit = async (values) => {
-   console.log("data", values)
+   
     setIsSubmitting(true);
 
     try {
