@@ -32,6 +32,7 @@ const app = express();
 const allowedOrigins = [
   'http://localhost:3000',
   'https://cap-analytics-admin-1.onrender.com',
+  'https://cap-analytics-admin.vercel.app',
 ];
 app.use(express.json());
 app.use(helmet());
