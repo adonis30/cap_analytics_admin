@@ -29,12 +29,13 @@ import LoadingSpinner from "components/LoadingSpinner";
 import EditCompany from "scenes/companies/[id]/update";
 import CreateInvestorPage from "scenes/investors/create";
 import EditInvestor from "scenes/investors/[id]/update";
-import SdgFocusOverview from "scenes/sdgfocus";
 import ToolsOverview from "scenes/tools";
 import { CreateInvestmentAsk, CreateSdgFocus, CreateSector, CreateTicketSize, EditInvestmentAsk, EditSdgFocus, EditSector, EditTicketSize } from "scenes/tools/create";
 import Employees from "scenes/employees";
 import CreateEmployeePage from "scenes/employees/create";
 import EditEmployee from "scenes/employees/[id]/update";
+import Charts from "scenes/charts";
+import CreateCharts from "scenes/charts/create";
 
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated } = useAuthStore();
@@ -139,6 +140,8 @@ function App() {
               <Route path="/employees" element={< Employees />} />
               <Route path="/employees/create" element={< CreateEmployeePage />} />
               <Route path="/employees/update/:id" element={<EditEmployee />} />
+              <Route path="/charts" element={<Charts />} />
+              <Route path="/charts/create" element={<CreateCharts />} />
 
               {/* Users route */}
               <Route path="/users" element={<Users />} />

@@ -22,7 +22,6 @@ import {
   GroupAddOutlined,
   PublicOutlined,
   PointOfSaleOutlined,
-  TodayOutlined,
   CalendarMonthOutlined,
   AdminPanelSettingsOutlined,
   TrendingUpOutlined,
@@ -176,7 +175,7 @@ const Sidebar = ({ drawerWidth, isSidebarOpen, setIsSidebarOpen, isNonMobile }) 
                 renderNavItems(
                   [
                     { text: "tools", icon: <PointOfSaleOutlined /> },
-                    { text: "Daily", icon: <TodayOutlined /> },
+                    { text: "Charts", icon: <PieChartOutlined /> },
                     { text: "Monthly", icon: <CalendarMonthOutlined /> },
                     { text: "Breakdown", icon: <PieChartOutlined /> },
                   ],
