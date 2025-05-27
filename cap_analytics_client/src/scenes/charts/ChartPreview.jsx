@@ -56,12 +56,7 @@ const ChartPreview = ({ data, metadata }) => {
               <Typography variant="h6" gutterBottom>
                 🥧 Pie Chart - {key}
               </Typography>
-              <PieChartComponent
-                title={`${metadata.title} - ${key}`}
-                data={data}
-                dataKey={key}
-                nameKey={xKey}
-              />
+              <PieChartComponent title={metadata.title} data={data} />
             </Paper>
           </Grid>
         </React.Fragment>

@@ -1,33 +1,27 @@
+// components/chartsView/LineChartComponent.jsx
 import React from 'react';
 import {
-  ResponsiveContainer,
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  Tooltip,
-  CartesianGrid,
+  LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer
 } from 'recharts';
+import { Typography } from '@mui/material';
 
-const LineChartComponent = ({ data, metadata }) => {
-  if (!data || data.length === 0) return <p>No data to display</p>;
-
-  // Choose keys dynamically or hard-code based on schema
-  const xKey = Object.keys(data[0])[0];  // e.g. 'year'
-  const yKeys = Object.keys(data[0]).filter((key) => key !== xKey);
-
+const LineChartComponent = ({ title, data, xKey, lineKeys }) => {
   return (
-    <ResponsiveContainer width="100%" height={400}>
-      <LineChart data={data}>
-        <CartesianGrid strokeDasharray="3 3" />
-        <XAxis dataKey={xKey} />
-        <YAxis />
-        <Tooltip />
-        {yKeys.map((key) => (
-          <Line type="monotone" dataKey={key} stroke="#8884d8" key={key} />
-        ))}
-      </LineChart>
-    </ResponsiveContainer>
+    <div style={{ width: '100%', height: 300 }}>
+      <Typography variant="subtitle1" gutterBottom>{title}</Typography>
+      <ResponsiveContainer>
+        <LineChart data={data}>
+          <CartesianGrid stroke="#ccc" />
+          <XAxis dataKey={xKey} />
+          <YAxis />
+          <Tooltip />
+          <Legend />
+          {lineKeys.map((key, index) => (
+            <Line key={key} type="monotone" dataKey={key} stroke="#8884d8" />
+          ))}
+        </LineChart>
+      </ResponsiveContainer>
+    </div>
   );
 };
 
