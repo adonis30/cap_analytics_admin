@@ -23,6 +23,7 @@ import sdgFocusRoutes from './routes/sdgFocusRoutes.js';
 import ticketSize from './routes/ticketSize.js';
 import investmentAsk from './routes/investmentAsk.js'; // Importing the investment ask routes
 import sector from './routes/sector.js';
+import chartRoutes from "./routes/chartRoutes.js";
 import errorMiddleware from "./middlewares/error.middleware.js";
  
 
@@ -75,6 +76,7 @@ app.use("/api/v1/investmentAsk", investmentAsk);
 
 // Use image routes
 app.use('/api/v1/images', imageRoutes);
+app.use("/api/v1/charts", chartRoutes);
 app.use("/api/v1/categories", categoryRoutes);
 
 
