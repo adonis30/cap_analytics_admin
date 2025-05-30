@@ -8,7 +8,8 @@ import {
   updateChartMetadata,
   getAllChartData,
   getChartDataById,
-  getChartsByCategory
+  getChartsByCategory,
+  getDistinctNamesByCategory
 } from '../controllers/chartController.js';
 
 const router = express.Router();
@@ -35,5 +36,7 @@ router.put('/:metadataId', updateChartMetadata);
 router.delete('/:metadataId', deleteChartData);
 
 router.get('/category/:category', getChartsByCategory);
+// Get distinct chart names by category
+router.get('/names/:category', getDistinctNamesByCategory);
 
 export default router;

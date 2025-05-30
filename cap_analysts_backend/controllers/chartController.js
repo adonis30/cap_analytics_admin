@@ -1,12 +1,10 @@
 import { format } from 'date-fns';
-import * as XLSX from "xlsx";
+import * as XLSX from 'xlsx';
 import ChartMetadata from "../models/ChartMetadata.js";
 import ChartData from "../models/ChartData.js";
 
-// Helper function
 const excelDateToISO = (excelSerial) => {
-  const jsDate = XLSX.SSF.parse_date_code(excelSerial);
-  const date = new Date(jsDate.y, jsDate.m - 1, jsDate.d);
+  const date = new Date((excelSerial - 25569) * 86400 * 1000);
   return date.toISOString();
 };
 
@@ -231,6 +229,20 @@ export const getChartsByCategory = async (req, res) => {
   } catch (err) {
     console.error('getChartsByCategory error:', err);
     res.status(500).json({ error: 'Server error while fetching charts by category' });
+  }
+};
+
+// controllers/chartController.js
+export const getDistinctNamesByCategory = async (req, res) => {
+  try {
+    const { category } = req.params;
+    if (!category) return res.status(400).json({ error: "Category is required" });
+
+    const names = await ChartMetadata.distinct("name", { category });
+    res.status(200).json({ category, names });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to retrieve names" });
   }
 };
 
