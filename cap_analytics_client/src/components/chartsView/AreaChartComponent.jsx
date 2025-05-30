@@ -1,35 +1,20 @@
-// components/chartsView/AreaChartComponent.jsx
 import React from 'react';
-import {
-  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
-} from 'recharts';
-import { Typography, Box } from '@mui/material';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { formatLabelKey } from 'utils/formatLabelKey';
 
-const AreaChartComponent = ({ title, data, xKey, areaKeys, colors = [] }) => {
-  return (
-    <Box sx={{ width: '100%', height: 400 }}>
-      <Typography variant="h6" gutterBottom>{title}</Typography>
-      <ResponsiveContainer width="100%" height="100%">
-        <AreaChart data={data} margin={{ top: 20, right: 30, left: 0, bottom: 0 }}>
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey={xKey} />
-          <YAxis />
-          <Tooltip />
-          <Legend />
-          {areaKeys.map((key, index) => (
-            <Area 
-            key={key} 
-            type="monotone" 
-            dataKey={key} 
-            stackId="1" 
-            stroke={colors[index % colors.length]}
-            strokeWidth={2}
-             />
-          ))}
-        </AreaChart>
-      </ResponsiveContainer>
-    </Box>
-  );
-};
+const AreaChartComponent = ({ title, data, xKey, areaKeys, colors }) => (
+  <ResponsiveContainer width="100%" height={300}>
+    <AreaChart data={data}>
+      <CartesianGrid strokeDasharray="3 3" />
+      <XAxis dataKey={xKey} tickFormatter={formatLabelKey} />
+      <YAxis />
+      <Tooltip formatter={(value, name) => [value, formatLabelKey(name)]} />
+      <Legend formatter={formatLabelKey} />
+      {areaKeys.map((key, i) => (
+        <Area key={key} type="monotone" dataKey={key} stroke={colors[i % colors.length]} fill={colors[i % colors.length]} name={formatLabelKey(key)} />
+      ))}
+    </AreaChart>
+  </ResponsiveContainer>
+);
 
 export default AreaChartComponent;

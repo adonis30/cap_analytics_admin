@@ -1,51 +1,20 @@
 import React from 'react';
-import {
-  ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid,
-  Tooltip, Legend, Label
-} from 'recharts';
-import { Typography, Box } from '@mui/material';
+import { ResponsiveContainer, LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, Legend } from 'recharts';
+import { formatLabelKey } from 'utils/formatLabelKey';
 
-// Utility to format field names
-const formatKey = (key) => {
-  return key
-    .replace(/_/g, ' ')
-    .replace(/\b\w/g, (char) => char.toUpperCase())
-    .trim();
-};
-
-const LineChartComponent = ({ title, data, xKey, lineKeys = [], colors = [] }) => {
-  return (
-    <Box>
-      <Typography variant="h6" gutterBottom>{title}</Typography>
-
-      <ResponsiveContainer width="100%" height={320}>
-        <LineChart data={data}>
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey={xKey}>
-            <Label value={formatKey(xKey)} offset={-5} position="insideBottom" />
-          </XAxis>
-          <YAxis>
-            <Label value="Rate (%)" angle={-90} position="insideLeft" />
-          </YAxis>
-          <Tooltip />
-          <Legend />
-          {lineKeys.map((key, index) => (
-            <Line
-              key={key}
-              type="monotone"
-              dataKey={key}
-              stroke={colors[index % colors.length]}
-              strokeWidth={2}
-              dot={{ r: 4 }}
-              activeDot={{ r: 6 }}
-              name={formatKey(key)}
-              label={{ position: 'top', fill: '#555', fontSize: 12 }}
-            />
-          ))}
-        </LineChart>
-      </ResponsiveContainer>
-    </Box>
-  );
-};
+const LineChartComponent = ({ title, data, xKey, lineKeys, colors }) => (
+  <ResponsiveContainer width="100%" height={300}>
+    <LineChart data={data}>
+      <CartesianGrid strokeDasharray="3 3" />
+      <XAxis dataKey={xKey} tickFormatter={formatLabelKey} />
+      <YAxis />
+      <Tooltip formatter={(value, name) => [value, formatLabelKey(name)]} />
+      <Legend formatter={formatLabelKey} />
+      {lineKeys.map((key, i) => (
+        <Line key={key} dataKey={key} stroke={colors[i % colors.length]} name={formatLabelKey(key)} />
+      ))}
+    </LineChart>
+  </ResponsiveContainer>
+);
 
 export default LineChartComponent;

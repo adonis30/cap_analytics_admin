@@ -1,6 +1,9 @@
 // src/scane/charts/Charts.jsx
 import React, { useState } from 'react';
-import { Box, Typography, Button, CircularProgress, useTheme } from '@mui/material';
+import {
+  Box, Typography, Button, CircularProgress, useTheme,
+  FormControl, InputLabel, Select, MenuItem, Grid
+} from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { useGetChartsByCategoryQuery } from 'state/api';
 import Header from 'components/Header';
@@ -14,47 +17,102 @@ const categories = [
 
 const Charts = () => {
   const [selectedCategory, setSelectedCategory] = useState('');
+  const [chartType, setChartType] = useState('');
+  const [startYear, setStartYear] = useState('');
+  const [endYear, setEndYear] = useState('');
   const navigate = useNavigate();
   const theme = useTheme();
 
-  const [chartType, setChartType] = useState('');
-const [startYear, setStartYear] = useState('');
-const [endYear, setEndYear] = useState('');
-
-const {
-  data: charts = [],
-  isFetching,
-  error,
-} = useGetChartsByCategoryQuery(
-  { category: selectedCategory, chartType, startYear, endYear },
-  { skip: !selectedCategory }
-);
+  const {
+    data: charts = [],
+    isFetching,
+    error,
+  } = useGetChartsByCategoryQuery(
+    { category: selectedCategory, chartType, startYear, endYear },
+    { skip: !selectedCategory }
+  );
 
   return (
     <Box m="1.5rem 2.5rem">
       <Header title="Charts" subtitle="Dynamic chart rendering from uploaded data" />
 
-      <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-        <Box>
-          <Typography variant="subtitle1" mb={1}>Filter Chart by Category</Typography>
-          <select
-            value={selectedCategory}
-            onChange={(e) => setSelectedCategory(e.target.value)}
-            style={{
-              padding: '10px',
-              borderRadius: '4px',
-              fontSize: '16px',
-              minWidth: '250px',
-            }}
-          >
-            <option value="">-- Select Category --</option>
-            {categories.map((cat) => (
-              <option key={cat} value={cat}>{cat}</option>
-            ))}
-          </select>
-        </Box>
+      <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
+        <Grid container spacing={2} alignItems="center">
+          <Grid item xs={12} sm={4}>
+            <FormControl fullWidth>
+              <InputLabel>Category</InputLabel>
+              <Select
+                value={selectedCategory}
+                onChange={(e) => setSelectedCategory(e.target.value)}
+                label="Category"
+              >
+                <MenuItem value=""><em>-- Select Category --</em></MenuItem>
+                {categories.map((cat) => (
+                  <MenuItem key={cat} value={cat}>{cat}</MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Grid>
 
-        <Button variant="contained" color="primary" onClick={() => navigate('/charts/create')}>
+          <Grid item xs={12} sm={4}>
+            <FormControl fullWidth>
+              <InputLabel>Chart Type</InputLabel>
+              <Select
+                value={chartType}
+                onChange={(e) => setChartType(e.target.value)}
+                label="Chart Type"
+              >
+                <MenuItem value=""><em>All Types</em></MenuItem>
+                <MenuItem value="line">Line</MenuItem>
+                <MenuItem value="bar">Bar</MenuItem>
+                <MenuItem value="area">Area</MenuItem>
+                <MenuItem value="pie">Pie</MenuItem>
+                <MenuItem value="combo">Combo</MenuItem>
+              </Select>
+            </FormControl>
+          </Grid>
+
+          <Grid item xs={6} sm={2}>
+            <FormControl fullWidth>
+              <InputLabel>Start Year</InputLabel>
+              <Select
+                value={startYear}
+                onChange={(e) => setStartYear(e.target.value)}
+                label="Start Year"
+              >
+                <MenuItem value=""><em>Any</em></MenuItem>
+                {[...Array(20)].map((_, i) => {
+                  const y = 2010 + i;
+                  return <MenuItem key={y} value={y}>{y}</MenuItem>;
+                })}
+              </Select>
+            </FormControl>
+          </Grid>
+
+          <Grid item xs={6} sm={2}>
+            <FormControl fullWidth>
+              <InputLabel>End Year</InputLabel>
+              <Select
+                value={endYear}
+                onChange={(e) => setEndYear(e.target.value)}
+                label="End Year"
+              >
+                <MenuItem value=""><em>Any</em></MenuItem>
+                {[...Array(20)].map((_, i) => {
+                  const y = 2010 + i;
+                  return <MenuItem key={y} value={y}>{y}</MenuItem>;
+                })}
+              </Select>
+            </FormControl>
+          </Grid>
+        </Grid>
+
+        <Button
+          variant="contained"
+          color="primary"
+          sx={{ ml: 2, height: 'fit-content' }}
+          onClick={() => navigate('/charts/create')}
+        >
           Upload Chart Data
         </Button>
       </Box>

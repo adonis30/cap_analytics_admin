@@ -3,79 +3,52 @@ import {
   Box, Button, Typography, MenuItem, Select, InputLabel,
   FormControl, Stack, CircularProgress, TextField,
 } from '@mui/material';
-import { useUploadChartDataMutation } from 'state/api';
+import { useUploadChartDataMutation, useGetChartNamesByCategoryQuery } from 'state/api';
 import { useForm, Controller } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
-
-const macroeconomicOptions = [
-  "Economic Growth",
-  "Inflation and exchange rate",
-  "Preliminary Annual GDP, 2024",
-  "Purchasing Manager's Index",
-  "Commecial Bank lending Rate",
-  "population growth rate",
-  "Central Govt External Debt (US$ bn), SOE External Debt (US$ bn) and Domestic Debt (K bn)"
-];
-
-const businessClimateOptions = [
-  "Ease of Starting a Business",
-  "Business Confidence Index",
-  "Regulatory Quality Index",
-  "Corruption Perception Index",
-  "Business Taxation Metrics",
-  "Ease of Obtaining Permits",
-];
-
-const investmentOptions = [
-  "Ease of Doing Business Score 2021 to 2024",
-  "FDI Inflows and Gdp growth rate(2021-2023)",
-  "Actualised Investments by Sector in (millions)  2021– 2024 ",
-  "FDI Inflows (USD Million)",
-  "Cut-off Coupon Rate  and Cut-off Yield Rate 2025",
-  "Total Liabilities (USD Billion) and Change"
-];
-
-const chartTypeOptions = {
-  line: ["default", "monotone", "step"],
-  bar: ["default", "grouped", "stacked", "percent"],
-  pie: ["default", "donut"],
-  area: ["default", "spline"],
-  combo: ["line-bar", "area-bar", "multi-axis"]
-};
 
 const UploadChart = () => {
   const navigate = useNavigate();
   const [file, setFile] = useState(null);
   const [uploadChart, { isLoading, error }] = useUploadChartDataMutation();
-
-  const { handleSubmit, control, watch } = useForm({
+  const { handleSubmit, control, watch, setValue } = useForm({
     defaultValues: {
       category: '',
       name: '',
+      customName: '',
       chartType: 'line',
       chartSubtype: 'default',
-    }
+    },
   });
 
   const selectedCategory = watch('category');
+  const selectedName = watch('name');
   const selectedChartType = watch('chartType');
 
-  const getOptionsByCategory = (category) => {
-    switch (category) {
-      case 'Macroeconomic Overview': return macroeconomicOptions;
-      case 'Business Climate': return businessClimateOptions;
-      case 'Investment Trends': return investmentOptions;
-      default: return [];
-    }
+  const { data: nameResponse = {}, isFetching: fetchingNames } = useGetChartNamesByCategoryQuery(selectedCategory, {
+    skip: !selectedCategory,
+  });
+
+  const dynamicNames = nameResponse.names || [];
+
+  const chartTypeOptions = {
+    line: ['default', 'monotone', 'step'],
+    bar: ['default', 'grouped', 'stacked', 'percent'],
+    pie: ['default', 'donut'],
+    area: ['default', 'spline'],
+    combo: ['line-bar', 'area-bar', 'multi-axis'],
   };
 
-  const onSubmit = async ({ category, name, chartType, chartSubtype }) => {
-    if (!file || !category || !name) return alert('Please provide all required fields.');
+  const onSubmit = async ({ category, name, customName, chartType, chartSubtype }) => {
+    const finalName = name === 'Other' ? customName : name;
+    if (!file || !category || !finalName) {
+      return alert('Please provide all required fields.');
+    }
 
     const formData = new FormData();
     formData.append('file', file);
     formData.append('category', category);
-    formData.append('name', name);
+    formData.append('name', finalName);
     formData.append('chartType', chartType);
     formData.append('chartSubtype', chartSubtype);
 
@@ -94,8 +67,6 @@ const UploadChart = () => {
 
       <form onSubmit={handleSubmit(onSubmit)}>
         <Stack spacing={2}>
-
-          {/* Chart Category */}
           <FormControl fullWidth required>
             <InputLabel>Chart Category</InputLabel>
             <Controller
@@ -111,7 +82,6 @@ const UploadChart = () => {
             />
           </FormControl>
 
-          {/* Chart Name */}
           {selectedCategory && (
             <FormControl fullWidth required>
               <InputLabel>Chart Name</InputLabel>
@@ -120,18 +90,25 @@ const UploadChart = () => {
                 name="name"
                 render={({ field }) => (
                   <Select {...field} label="Chart Name">
-                    {getOptionsByCategory(selectedCategory).map((item) => (
-                      <MenuItem key={item} value={item}>
-                        {item}
-                      </MenuItem>
+                    {dynamicNames.map((item) => (
+                      <MenuItem key={item} value={item}>{item}</MenuItem>
                     ))}
+                    <MenuItem value="Other">Other (Create new name)</MenuItem>
                   </Select>
                 )}
               />
             </FormControl>
           )}
 
-          {/* Chart Type */}
+          {selectedName === 'Other' && (
+            <TextField
+              fullWidth
+              required
+              label="Custom Chart Name"
+              {...control.register('customName')}
+            />
+          )}
+
           <FormControl fullWidth required>
             <InputLabel>Chart Type</InputLabel>
             <Controller
@@ -149,7 +126,6 @@ const UploadChart = () => {
             />
           </FormControl>
 
-          {/* Chart Subtype */}
           <FormControl fullWidth>
             <InputLabel>Chart Subtype</InputLabel>
             <Controller
@@ -165,7 +141,6 @@ const UploadChart = () => {
             />
           </FormControl>
 
-          {/* File Upload */}
           <input
             type="file"
             accept=".xlsx,.xls,.csv"
@@ -173,7 +148,6 @@ const UploadChart = () => {
             required
           />
 
-          {/* Submit Button */}
           <Button type="submit" variant="contained" disabled={isLoading}>
             {isLoading ? <CircularProgress size={24} /> : 'Upload'}
           </Button>

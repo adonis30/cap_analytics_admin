@@ -1,4 +1,3 @@
-// src/hooks/useChartKeys.js
 import { useMemo } from 'react';
 
 /**
@@ -11,14 +10,19 @@ const useChartKeys = (data = []) => {
     if (!Array.isArray(data) || data.length === 0) return { xKey: null, yKeys: [] };
 
     const sample = data[0];
-    const keys = Object.keys(sample).filter((k) => k !== '_id' && k !== 'metadataId' && k !== '__v');
+    const keys = Object.keys(sample).filter(
+      (k) => k !== '_id' && k !== 'metadataId' && k !== '__v'
+    );
 
-    const xKey = keys.find((key) =>
-      key.toLowerCase().includes('year') ||
-      key.toLowerCase().includes('date') ||
-      key.toLowerCase().includes('label') ||
-      key.toLowerCase().includes('category')
-    ) || keys[0]; // fallback to first valid key
+    // ✅ Prefer 'display_month' if present
+    const xKey =
+      keys.includes('display_month') ? 'display_month' :
+      keys.find((key) =>
+        key.toLowerCase().includes('year') ||
+        key.toLowerCase().includes('date') ||
+        key.toLowerCase().includes('label') ||
+        key.toLowerCase().includes('category')
+      ) || keys[0]; // fallback to first valid key
 
     const yKeys = keys.filter((k) => k !== xKey);
 

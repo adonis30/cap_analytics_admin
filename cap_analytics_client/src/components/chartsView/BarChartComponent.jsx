@@ -1,36 +1,20 @@
 import React from 'react';
-import {
-  ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Legend, CartesianGrid, Label,
-} from 'recharts';
-import { Typography, Box } from '@mui/material';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, CartesianGrid } from 'recharts';
+import { formatLabelKey } from 'utils/formatLabelKey';
 
-const BarChartComponent = ({ title, data, xKey, barKeys = [], colors = [], xAxisLabel = '', yAxisLabel = '' }) => {
-  return (
-    <Box>
-      <Typography variant="h6" gutterBottom>{title}</Typography>
-      <ResponsiveContainer width="100%" height={300}>
-        <BarChart data={data}>
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey={xKey}>
-            <Label value={xAxisLabel || xKey} offset={-5} position="insideBottom" />
-          </XAxis>
-          <YAxis>
-            <Label value={yAxisLabel || 'Value'} angle={-90} position="insideLeft" />
-          </YAxis>
-          <Tooltip />
-          <Legend />
-          {barKeys.map((key, index) => (
-            <Bar
-              key={key}
-              dataKey={key}
-              fill={colors[index % colors.length]}
-              label={{ position: 'top', fill: '#333', fontSize: 12 }}
-            />
-          ))}
-        </BarChart>
-      </ResponsiveContainer>
-    </Box>
-  );
-};
+const BarChartComponent = ({ title, data, xKey, barKeys, colors }) => (
+  <ResponsiveContainer width="100%" height={300}>
+    <BarChart data={data}>
+      <CartesianGrid strokeDasharray="3 3" />
+      <XAxis dataKey={xKey} tickFormatter={formatLabelKey} />
+      <YAxis />
+      <Tooltip formatter={(value, name) => [value, formatLabelKey(name)]} />
+      <Legend formatter={formatLabelKey} />
+      {barKeys.map((key, i) => (
+        <Bar key={key} dataKey={key} fill={colors[i % colors.length]} name={formatLabelKey(key)} />
+      ))}
+    </BarChart>
+  </ResponsiveContainer>
+);
 
 export default BarChartComponent;
