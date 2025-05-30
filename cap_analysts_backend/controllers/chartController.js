@@ -1,6 +1,14 @@
+import { format } from 'date-fns';
 import * as XLSX from "xlsx";
-import ChartData from "../models/ChartData.js";
 import ChartMetadata from "../models/ChartMetadata.js";
+import ChartData from "../models/ChartData.js";
+
+// Helper function
+const excelDateToISO = (excelSerial) => {
+  const jsDate = XLSX.SSF.parse_date_code(excelSerial);
+  const date = new Date(jsDate.y, jsDate.m - 1, jsDate.d);
+  return date.toISOString();
+};
 
 export const uploadChartData = async (req, res) => {
   try {
@@ -8,30 +16,53 @@ export const uploadChartData = async (req, res) => {
       return res.status(400).json({ error: "No file uploaded" });
     }
 
-    const buffer = req.file.buffer;
-    const workbook = XLSX.read(buffer, { type: "buffer" });
-    const sheetName = workbook.SheetNames[0];
-    const sheet = workbook.Sheets[sheetName];
+    const { category, name, chartType, chartSubtype } = req.body;
 
-    const jsonData = XLSX.utils.sheet_to_json(sheet, {
-      defval: "",
-      raw: false,
-      header: 0,
-    });
-
-    if (!jsonData || jsonData.length === 0) {
-      return res.status(400).json({ error: "Empty or invalid sheet" });
+    const validCategories = ["Macroeconomic Overview", "Business Climate", "Investment Trends"];
+    if (!category || !validCategories.includes(category)) {
+      return res.status(400).json({ error: "Invalid or missing chart category" });
+    }
+    if (!name) {
+      return res.status(400).json({ error: "Chart name is required" });
     }
 
-    const normalizedData = jsonData
+    const buffer = req.file.buffer;
+    const workbook = XLSX.read(buffer, { type: "buffer" });
+    const defaultSheetName = workbook.SheetNames[0];
+    const sheet = workbook.Sheets[defaultSheetName];
+
+    // Step 1: Raw parsing
+    const rawData = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: "" });
+    const [rawHeaders, ...rows] = rawData;
+
+    // Step 2: Normalize headers
+    const headers = rawHeaders.map((h, i) =>
+      h ? h.toString().trim().toLowerCase().replace(/[^\w]+/g, "_") : `column_${i}`
+    );
+
+    // Step 3: Transform and clean data
+    const normalizedData = rows
       .map((row) => {
-        const cleanRow = {};
-        for (const key in row) {
-          if (!key.trim()) continue;
-          const normalizedKey = key.trim().toLowerCase().replace(/\s+/g, "_");
-          cleanRow[normalizedKey] = row[key];
-        }
-        return cleanRow;
+        const obj = {};
+
+        headers.forEach((key, i) => {
+          let value = row[i];
+
+          // Handle Excel serial date
+          if (
+            (key === "month_year" || key === "month") &&
+            typeof value === "number"
+          ) {
+            const isoString = excelDateToISO(value);
+            const formatted = format(new Date(isoString), "MMM-yyyy");
+            obj["month_year"] = isoString;
+            obj["display_month"] = formatted;
+          } else if (value !== "") {
+            obj[key] = value;
+          }
+        });
+
+        return obj;
       })
       .filter((row) => Object.keys(row).length >= 2);
 
@@ -39,13 +70,19 @@ export const uploadChartData = async (req, res) => {
       return res.status(400).json({ error: "No usable data after cleanup" });
     }
 
+    // Step 4: Save metadata
     const metadata = await ChartMetadata.create({
-      title: sheetName || req.file.originalname,
+      title: defaultSheetName || req.file.originalname,
+      sheetName: defaultSheetName,
       sourceFileName: req.file.originalname,
       uploadedAt: new Date(),
-      sheetName,
+      category,
+      name,
+      chartType: chartType || "line",
+      chartSubtype: chartSubtype || "default",
     });
 
+    // Step 5: Save chart data
     await ChartData.insertMany(
       normalizedData.map((entry) => ({
         ...entry,
@@ -63,6 +100,8 @@ export const uploadChartData = async (req, res) => {
     res.status(500).json({ error: "Failed to process uploaded chart data" });
   }
 };
+
+
 
 export const getChartDataByMetadataId = async (req, res) => {
   try {
@@ -146,3 +185,52 @@ export const getAllChartData = async (req, res) => {
     res.status(500).json({ error: "Failed to retrieve all chart data" });
   }
 };
+
+export const getChartsByCategory = async (req, res) => {
+  try {
+    const { category } = req.params;
+    const { chartType, startYear, endYear } = req.query;
+
+    const match = { category };
+
+    if (chartType) {
+      match.chartType = chartType;
+    }
+
+    // Optional: Add year range filtering if you store a date/year field
+    // You must extract and store a proper `year` field in the database for this
+    // e.g., match.year = { $gte: Number(startYear), $lte: Number(endYear) }
+
+    const metadataList = await ChartMetadata.find(match);
+    const metadataIds = metadataList.map((m) => m._id);
+
+    const charts = await ChartData.aggregate([
+      { $match: { metadataId: { $in: metadataIds } } },
+      {
+        $group: {
+          _id: '$metadataId',
+          data: { $push: '$$ROOT' },
+        },
+      },
+    ]);
+
+    const result = charts.map((group) => {
+      const metadata = metadataList.find((m) => m._id.toString() === group._id.toString());
+      return {
+        _id: group._id,
+        chartType: metadata.chartType,
+        category: metadata.category,
+        name: metadata.name,
+        title: metadata.title,
+        uploadedAt: metadata.uploadedAt,
+        data: group.data,
+      };
+    });
+
+    res.status(200).json(result);
+  } catch (err) {
+    console.error('getChartsByCategory error:', err);
+    res.status(500).json({ error: 'Server error while fetching charts by category' });
+  }
+};
+

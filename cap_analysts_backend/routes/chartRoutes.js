@@ -7,7 +7,8 @@ import {
   deleteChartData,
   updateChartMetadata,
   getAllChartData,
-  getChartDataById
+  getChartDataById,
+  getChartsByCategory
 } from '../controllers/chartController.js';
 
 const router = express.Router();
@@ -32,5 +33,7 @@ router.put('/:metadataId', updateChartMetadata);
 
 // Delete chart and its associated data
 router.delete('/:metadataId', deleteChartData);
+
+router.get('/category/:category', getChartsByCategory);
 
 export default router;
