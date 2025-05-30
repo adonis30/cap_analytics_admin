@@ -1,27 +1,50 @@
-// components/chartsView/LineChartComponent.jsx
 import React from 'react';
 import {
-  LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer
+  ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid,
+  Tooltip, Legend, Label
 } from 'recharts';
-import { Typography } from '@mui/material';
+import { Typography, Box } from '@mui/material';
 
-const LineChartComponent = ({ title, data, xKey, lineKeys }) => {
+// Utility to format field names
+const formatKey = (key) => {
+  return key
+    .replace(/_/g, ' ')
+    .replace(/\b\w/g, (char) => char.toUpperCase())
+    .trim();
+};
+
+const LineChartComponent = ({ title, data, xKey, lineKeys = [], colors = [] }) => {
   return (
-    <div style={{ width: '100%', height: 300 }}>
-      <Typography variant="subtitle1" gutterBottom>{title}</Typography>
-      <ResponsiveContainer>
+    <Box>
+      <Typography variant="h6" gutterBottom>{title}</Typography>
+
+      <ResponsiveContainer width="100%" height={320}>
         <LineChart data={data}>
-          <CartesianGrid stroke="#ccc" />
-          <XAxis dataKey={xKey} />
-          <YAxis />
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis dataKey={xKey}>
+            <Label value={formatKey(xKey)} offset={-5} position="insideBottom" />
+          </XAxis>
+          <YAxis>
+            <Label value="Rate (%)" angle={-90} position="insideLeft" />
+          </YAxis>
           <Tooltip />
           <Legend />
           {lineKeys.map((key, index) => (
-            <Line key={key} type="monotone" dataKey={key} stroke="#8884d8" />
+            <Line
+              key={key}
+              type="monotone"
+              dataKey={key}
+              stroke={colors[index % colors.length]}
+              strokeWidth={2}
+              dot={{ r: 4 }}
+              activeDot={{ r: 6 }}
+              name={formatKey(key)}
+              label={{ position: 'top', fill: '#555', fontSize: 12 }}
+            />
           ))}
         </LineChart>
       </ResponsiveContainer>
-    </div>
+    </Box>
   );
 };
 

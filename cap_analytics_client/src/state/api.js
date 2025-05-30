@@ -499,6 +499,18 @@ export const api = createApi({
       providesTags: ["ChartMetadata"],
     }),
 
+    getChartsByCategory: build.query({
+      query: ({ category, chartType, startYear, endYear }) => {
+        const params = new URLSearchParams();
+
+        if (chartType) params.append("chartType", chartType);
+        if (startYear) params.append("startYear", startYear);
+        if (endYear) params.append("endYear", endYear);
+
+        return `${url}charts/category/${encodeURIComponent(category)}?${params.toString()}`;
+      },
+    }),
+
     getChartDataByMetadataId: build.query({
       query: (metadataId) => `${url}charts/data/${metadataId}`,
       providesTags: (result, error, metadataId) => [
@@ -581,4 +593,5 @@ export const {
   useUploadChartDataMutation,
   useGetChartMetadataQuery,
   useGetChartDataByMetadataIdQuery,
+  useGetChartsByCategoryQuery,
 } = api;
