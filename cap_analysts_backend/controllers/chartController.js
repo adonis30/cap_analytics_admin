@@ -15,7 +15,6 @@ export const uploadChartData = async (req, res) => {
     }
 
     const { category, name, chartType, chartSubtype } = req.body;
-
     const validCategories = ["Macroeconomic Overview", "Business Climate", "Investment Trends"];
     if (!category || !validCategories.includes(category)) {
       return res.status(400).json({ error: "Invalid or missing chart category" });
@@ -29,75 +28,79 @@ export const uploadChartData = async (req, res) => {
     const defaultSheetName = workbook.SheetNames[0];
     const sheet = workbook.Sheets[defaultSheetName];
 
-    // Step 1: Raw parsing
     const rawData = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: "" });
     const [rawHeaders, ...rows] = rawData;
 
-    // Step 2: Normalize headers
     const headers = rawHeaders.map((h, i) =>
       h ? h.toString().trim().toLowerCase().replace(/[^\w]+/g, "_") : `column_${i}`
     );
 
-    // Step 3: Transform and clean data
-    const normalizedData = rows
-      .map((row) => {
-        const obj = {};
-
-        headers.forEach((key, i) => {
-          let value = row[i];
-
-          // Handle Excel serial date
-          if (
-            (key === "month_year" || key === "month") &&
-            typeof value === "number"
-          ) {
-            const isoString = excelDateToISO(value);
-            const formatted = format(new Date(isoString), "MMM-yyyy");
-            obj["month_year"] = isoString;
-            obj["display_month"] = formatted;
-          } else if (value !== "") {
-            obj[key] = value;
-          }
-        });
-
-        return obj;
-      })
-      .filter((row) => Object.keys(row).length >= 2);
+    const normalizedData = rows.map((row) => {
+      const obj = {};
+      headers.forEach((key, i) => {
+        let value = row[i];
+        if ((key === "month_year" || key === "month") && typeof value === "number") {
+          const isoString = new Date((value - 25569) * 86400 * 1000).toISOString();
+          const formatted = format(new Date(isoString), "MMM-yyyy");
+          obj["month_year"] = isoString;
+          obj["display_month"] = formatted;
+        } else if (value !== "") {
+          obj[key] = value;
+        }
+      });
+      return obj;
+    }).filter((row) => Object.keys(row).length >= 2);
 
     if (normalizedData.length === 0) {
       return res.status(400).json({ error: "No usable data after cleanup" });
     }
 
-    // Step 4: Save metadata
-    const metadata = await ChartMetadata.create({
-      title: defaultSheetName || req.file.originalname,
-      sheetName: defaultSheetName,
-      sourceFileName: req.file.originalname,
-      uploadedAt: new Date(),
-      category,
-      name,
-      chartType: chartType || "line",
-      chartSubtype: chartSubtype || "default",
-    });
+    // 🔍 Check if metadata already exists
+    let metadata = await ChartMetadata.findOne({ category, name });
 
-    // Step 5: Save chart data
-    await ChartData.insertMany(
-      normalizedData.map((entry) => ({
-        ...entry,
-        metadataId: metadata._id,
-      }))
-    );
+    if (metadata) {
+      // 🧹 Optional: Remove previous data
+      await ChartData.deleteMany({ metadataId: metadata._id });
+
+      // ✏️ Optionally update metadata fields
+      metadata.uploadedAt = new Date();
+      metadata.sheetName = defaultSheetName;
+      metadata.sourceFileName = req.file.originalname;
+      metadata.chartType = chartType || metadata.chartType;
+      metadata.chartSubtype = chartSubtype || metadata.chartSubtype;
+      await metadata.save();
+    } else {
+      // 🆕 Create new metadata if not found
+      metadata = await ChartMetadata.create({
+        title: defaultSheetName || req.file.originalname,
+        sheetName: defaultSheetName,
+        sourceFileName: req.file.originalname,
+        uploadedAt: new Date(),
+        category,
+        name,
+        chartType: chartType || "line",
+        chartSubtype: chartSubtype || "default",
+      });
+    }
+
+    // 💾 Insert new data rows
+    await ChartData.insertMany(normalizedData.map((entry) => ({
+      ...entry,
+      metadataId: metadata._id,
+    })));
 
     res.status(201).json({
       message: "Chart data uploaded successfully",
       metadataId: metadata._id,
       recordCount: normalizedData.length,
     });
+
   } catch (err) {
     console.error("Upload error:", err);
     res.status(500).json({ error: "Failed to process uploaded chart data" });
   }
 };
+
 
 
 

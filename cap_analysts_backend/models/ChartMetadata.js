@@ -46,7 +46,7 @@ const ChartMetadataSchema = new mongoose.Schema({
   default: 'default',
 },
 
-});
+}, { timestamps: true });
 
 const ChartMetadata = mongoose.model("ChartMetadata", ChartMetadataSchema);
 export default ChartMetadata;
