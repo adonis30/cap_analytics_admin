@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useMemo } from 'react';
 import { Box, Typography, Button, Divider, Stack, Chip } from '@mui/material';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
@@ -12,7 +12,7 @@ import PieChartComponent from 'components/chartsView/PieChartComponent';
 import AreaChartComponent from 'components/chartsView/AreaChartComponent';
 import ComboChartComponent from 'components/chartsView/ComboChartComponent';
 
-// Helper to format keys to user-friendly labels
+// Helper to format keys like month_year into readable labels
 const formatLabelKey = (key) => {
   if (!key || typeof key !== 'string') return key;
   return key
@@ -29,6 +29,28 @@ const ChartPreview = ({ chartType = 'line', data = [], metadata = {} }) => {
       ? generateColors(data.length)
       : generateColors(yKeys.length);
 
+  // 🔁 Ensure data is sorted by xKey (especially for years)
+  const sortedData = useMemo(() => {
+    if (!xKey) return data;
+
+    return [...data].sort((a, b) => {
+      const aVal = a[xKey];
+      const bVal = b[xKey];
+
+      // Handle ISO strings or month-year formatting
+      if (typeof aVal === 'string' && typeof bVal === 'string') {
+        return new Date(aVal) - new Date(bVal);
+      }
+
+      // Handle numeric year
+      if (!isNaN(aVal) && !isNaN(bVal)) {
+        return Number(aVal) - Number(bVal);
+      }
+
+      return 0;
+    });
+  }, [data, xKey]);
+
   const exportToPDF = async () => {
     if (!chartRef.current) return;
     const canvas = await html2canvas(chartRef.current);
@@ -41,7 +63,7 @@ const ChartPreview = ({ chartType = 'line', data = [], metadata = {} }) => {
 
   const renderChart = () => {
     const chartProps = {
-      data,
+      data: sortedData,
       xKey,
       colors,
     };
@@ -72,7 +94,7 @@ const ChartPreview = ({ chartType = 'line', data = [], metadata = {} }) => {
   };
 
   const renderLegend = () => {
-    if (chartType === 'pie') return null; // pie already renders internal legend
+    if (chartType === 'pie') return null;
 
     return (
       <Stack direction="row" spacing={1} mt={2} flexWrap="wrap">
