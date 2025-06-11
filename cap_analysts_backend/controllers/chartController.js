@@ -59,10 +59,7 @@ export const uploadChartData = async (req, res) => {
     let metadata = await ChartMetadata.findOne({ category, name });
 
     if (metadata) {
-      // 🧹 Optional: Remove previous data
-      await ChartData.deleteMany({ metadataId: metadata._id });
-
-      // ✏️ Optionally update metadata fields
+       
       metadata.uploadedAt = new Date();
       metadata.sheetName = defaultSheetName;
       metadata.sourceFileName = req.file.originalname;
@@ -70,7 +67,7 @@ export const uploadChartData = async (req, res) => {
       metadata.chartSubtype = chartSubtype || metadata.chartSubtype;
       await metadata.save();
     } else {
-      // 🆕 Create new metadata if not found
+      // 🆕 Create new metadata
       metadata = await ChartMetadata.create({
         title: defaultSheetName || req.file.originalname,
         sheetName: defaultSheetName,
@@ -83,14 +80,22 @@ export const uploadChartData = async (req, res) => {
       });
     }
 
-    // 💾 Insert new data rows
-    await ChartData.insertMany(normalizedData.map((entry) => ({
-      ...entry,
-      metadataId: metadata._id,
-    })));
+    // 🔁 Upsert each row by unique key (e.g. month_year if present)
+    for (const entry of normalizedData) {
+      const query = {
+        metadataId: metadata._id,
+        ...(entry.month_year && { month_year: entry.month_year }),
+      };
+
+      await ChartData.findOneAndUpdate(
+        query,
+        { ...entry, metadataId: metadata._id },
+        { upsert: true, new: true, setDefaultsOnInsert: true }
+      );
+    }
 
     res.status(201).json({
-      message: "Chart data uploaded successfully",
+      message: "Chart data uploaded successfully (upserted)",
       metadataId: metadata._id,
       recordCount: normalizedData.length,
     });
