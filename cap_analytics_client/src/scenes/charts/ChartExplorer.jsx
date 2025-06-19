@@ -22,6 +22,7 @@ import ChartPreview from "./ChartPreview";
 import Header from "components/Header";
 import worldGeoJson from "utils/world-geo.json";
 import countries from "utils/isoCountries";
+import { useNavigate } from "react-router-dom";
 
 import {
   useGetChartMetadataQuery,
@@ -41,6 +42,7 @@ const ChartExplorer = () => {
   const [chartType, setChartType] = useState("");
   const [startYear, setStartYear] = useState("");
   const [endYear, setEndYear] = useState("");
+  const navigate = useNavigate();
 
   const { data: metadataList = [], isFetching: loadingMeta } =
     useGetChartMetadataQuery();
@@ -173,7 +175,7 @@ const ChartExplorer = () => {
               <Button
                 variant="contained"
                 color="primary"
-                onClick={() => (window.location.href = "/charts/create")}
+                onClick={() => navigate('/charts/create')}
               >
                 Upload Chart Data
               </Button>
