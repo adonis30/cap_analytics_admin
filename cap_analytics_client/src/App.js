@@ -34,7 +34,7 @@ import { CreateInvestmentAsk, CreateSdgFocus, CreateSector, CreateTicketSize, Ed
 import Employees from "scenes/employees";
 import CreateEmployeePage from "scenes/employees/create";
 import EditEmployee from "scenes/employees/[id]/update";
-import Charts from "scenes/charts";
+import ChartExplorer from 'scenes/charts/ChartExplorer';
 import CreateCharts from "scenes/charts/create";
 
 const ProtectedRoute = ({ children }) => {
@@ -140,7 +140,7 @@ function App() {
               <Route path="/employees" element={< Employees />} />
               <Route path="/employees/create" element={< CreateEmployeePage />} />
               <Route path="/employees/update/:id" element={<EditEmployee />} />
-              <Route path="/charts" element={<Charts />} />
+              <Route path="/charts" element={<ChartExplorer />} />
               <Route path="/charts/create" element={<CreateCharts />} />
 
               {/* Users route */}

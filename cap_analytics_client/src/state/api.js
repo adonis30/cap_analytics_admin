@@ -511,6 +511,11 @@ export const api = createApi({
       },
     }),
 
+    getAllChartData: build.query({
+      query: () => `${url}charts/all`,
+      providesTags: ["ChartData"],
+    }),
+
     getChartNamesByCategory: build.query({
       query: (category) => `${url}charts/names/${encodeURIComponent(category)}`,
     }),
@@ -599,4 +604,5 @@ export const {
   useGetChartDataByMetadataIdQuery,
   useGetChartsByCategoryQuery,
   useGetChartNamesByCategoryQuery,
+  useGetAllChartDataQuery,
 } = api;

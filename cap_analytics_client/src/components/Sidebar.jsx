@@ -28,13 +28,19 @@ import {
   PieChartOutlined,
   ExpandLess,
   ExpandMore,
+  Explore as ExploreIcon,
 } from "@mui/icons-material";
 import { useLocation, useNavigate } from "react-router-dom";
 import FlexBetween from "./FlexBetween";
 import profileImage from "assets/profile.jpeg";
 import { useAuthStore } from "store/authStore";
 
-const Sidebar = ({ drawerWidth, isSidebarOpen, setIsSidebarOpen, isNonMobile }) => {
+const Sidebar = ({
+  drawerWidth,
+  isSidebarOpen,
+  setIsSidebarOpen,
+  isNonMobile,
+}) => {
   const { pathname } = useLocation();
   const [active, setActive] = useState("");
   const [clientFacingOpen, setClientFacingOpen] = useState(false);
@@ -62,14 +68,23 @@ const Sidebar = ({ drawerWidth, isSidebarOpen, setIsSidebarOpen, isNonMobile }) 
           <ListItemButton
             onClick={() => handleNavigate(lcText)}
             sx={{
-              backgroundColor: active === lcText ? theme.palette.secondary[300] : "transparent",
-              color: active === lcText ? theme.palette.primary[600] : theme.palette.secondary[100],
+              backgroundColor:
+                active === lcText
+                  ? theme.palette.secondary[300]
+                  : "transparent",
+              color:
+                active === lcText
+                  ? theme.palette.primary[600]
+                  : theme.palette.secondary[100],
               pl: paddingLeft,
             }}
           >
             <ListItemIcon
               sx={{
-                color: active === lcText ? theme.palette.primary[600] : theme.palette.secondary[200],
+                color:
+                  active === lcText
+                    ? theme.palette.primary[600]
+                    : theme.palette.secondary[200],
               }}
             >
               {icon}
@@ -104,7 +119,11 @@ const Sidebar = ({ drawerWidth, isSidebarOpen, setIsSidebarOpen, isNonMobile }) 
             {/* Header */}
             <Box m="1.5rem 2rem 2rem 3rem">
               <FlexBetween color={theme.palette.secondary.main}>
-                <Typography variant="h4" fontWeight="bold">
+                <Typography
+                  variant="h4"
+                  fontWeight="bold"
+                  onClick={() => handleNavigate("dashboard")}
+                >
                   CAP-ANALYTICS
                 </Typography>
                 {!isNonMobile && (
@@ -121,26 +140,39 @@ const Sidebar = ({ drawerWidth, isSidebarOpen, setIsSidebarOpen, isNonMobile }) 
                 <ListItemButton
                   onClick={() => handleNavigate("dashboard")}
                   sx={{
-                    backgroundColor: active === "dashboard" ? theme.palette.secondary[300] : "transparent",
-                    color: active === "dashboard" ? theme.palette.primary[600] : theme.palette.secondary[100],
+                    backgroundColor:
+                      active === "dashboard"
+                        ? theme.palette.secondary[300]
+                        : "transparent",
+                    color:
+                      active === "dashboard"
+                        ? theme.palette.primary[600]
+                        : theme.palette.secondary[100],
                   }}
                 >
                   <ListItemIcon
                     sx={{
                       ml: "2rem",
-                      color: active === "dashboard" ? theme.palette.primary[600] : theme.palette.secondary[200],
+                      color:
+                        active === "dashboard"
+                          ? theme.palette.primary[600]
+                          : theme.palette.secondary[200],
                     }}
                   >
                     <HomeOutlined />
                   </ListItemIcon>
                   <ListItemText primary="Dashboard" />
-                  {active === "dashboard" && <ChevronRightOutlined sx={{ ml: "auto" }} />}
+                  {active === "dashboard" && (
+                    <ChevronRightOutlined sx={{ ml: "auto" }} />
+                  )}
                 </ListItemButton>
               </ListItem>
 
               {/* Client Facing */}
               <ListItem disablePadding>
-                <ListItemButton onClick={() => setClientFacingOpen(!clientFacingOpen)}>
+                <ListItemButton
+                  onClick={() => setClientFacingOpen(!clientFacingOpen)}
+                >
                   <ListItemText
                     primary="Client Facing"
                     sx={{ pl: "2rem", color: theme.palette.secondary[100] }}
@@ -163,7 +195,9 @@ const Sidebar = ({ drawerWidth, isSidebarOpen, setIsSidebarOpen, isNonMobile }) 
 
               {/* Deals and Tools */}
               <ListItem disablePadding>
-                <ListItemButton onClick={() => setDealsToolsOpen(!dealsToolsOpen)}>
+                <ListItemButton
+                  onClick={() => setDealsToolsOpen(!dealsToolsOpen)}
+                >
                   <ListItemText
                     primary="Deals and Tools"
                     sx={{ pl: "2rem", color: theme.palette.secondary[100] }}
@@ -175,7 +209,7 @@ const Sidebar = ({ drawerWidth, isSidebarOpen, setIsSidebarOpen, isNonMobile }) 
                 renderNavItems(
                   [
                     { text: "tools", icon: <PointOfSaleOutlined /> },
-                    { text: "Charts", icon: <PieChartOutlined /> },
+                    { text: "Charts", icon: <ExploreIcon /> },
                     { text: "Monthly", icon: <CalendarMonthOutlined /> },
                     { text: "Breakdown", icon: <PieChartOutlined /> },
                   ],
@@ -184,7 +218,9 @@ const Sidebar = ({ drawerWidth, isSidebarOpen, setIsSidebarOpen, isNonMobile }) 
 
               {/* Management */}
               <ListItem disablePadding>
-                <ListItemButton onClick={() => setManagementOpen(!managementOpen)}>
+                <ListItemButton
+                  onClick={() => setManagementOpen(!managementOpen)}
+                >
                   <ListItemText
                     primary="Management"
                     sx={{ pl: "2rem", color: theme.palette.secondary[100] }}
@@ -205,7 +241,6 @@ const Sidebar = ({ drawerWidth, isSidebarOpen, setIsSidebarOpen, isNonMobile }) 
 
           {/* Footer */}
           <Box position="absolute" bottom="2rem">
-            
             <Divider />
             <FlexBetween textTransform="none" gap="1rem" m="1.5rem 2rem 0 3rem">
               <Box
@@ -225,11 +260,16 @@ const Sidebar = ({ drawerWidth, isSidebarOpen, setIsSidebarOpen, isNonMobile }) 
                 >
                   {user.firstName + " " + user.lastName}
                 </Typography>
-                <Typography fontSize="0.8rem" sx={{ color: theme.palette.secondary[200] }}>
+                <Typography
+                  fontSize="0.8rem"
+                  sx={{ color: theme.palette.secondary[200] }}
+                >
                   {user.role}
                 </Typography>
               </Box>
-              <SettingsOutlined sx={{ color: theme.palette.secondary[300], fontSize: "25px" }} />
+              <SettingsOutlined
+                sx={{ color: theme.palette.secondary[300], fontSize: "25px" }}
+              />
             </FlexBetween>
           </Box>
         </Drawer>

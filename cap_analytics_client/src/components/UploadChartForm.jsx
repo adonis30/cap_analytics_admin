@@ -7,12 +7,27 @@ import { useUploadChartDataMutation, useGetChartNamesByCategoryQuery } from 'sta
 import { useForm, Controller } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 
+const regionOptions = [
+  'Global', 'Africa', 'Asia', 'Europe', 'North America', 'South America'
+];
+
+const chartTypeOptions = {
+  line: ['default', 'monotone', 'step'],
+  bar: ['default', 'grouped', 'stacked', 'percent'],
+  pie: ['default', 'donut'],
+  area: ['default', 'spline'],
+  combo: ['line-bar', 'area-bar', 'multi-axis'],
+};
+
 const UploadChart = () => {
   const navigate = useNavigate();
   const [file, setFile] = useState(null);
   const [uploadChart, { isLoading, error }] = useUploadChartDataMutation();
-  const { handleSubmit, control, watch, setValue } = useForm({
+
+  const { handleSubmit, control, watch } = useForm({
     defaultValues: {
+      region: '',
+      country: '',
       category: '',
       name: '',
       customName: '',
@@ -31,22 +46,18 @@ const UploadChart = () => {
 
   const dynamicNames = nameResponse.names || [];
 
-  const chartTypeOptions = {
-    line: ['default', 'monotone', 'step'],
-    bar: ['default', 'grouped', 'stacked', 'percent'],
-    pie: ['default', 'donut'],
-    area: ['default', 'spline'],
-    combo: ['line-bar', 'area-bar', 'multi-axis'],
-  };
-
-  const onSubmit = async ({ category, name, customName, chartType, chartSubtype }) => {
+  const onSubmit = async ({
+    region, country, category, name, customName, chartType, chartSubtype
+  }) => {
     const finalName = name === 'Other' ? customName : name;
-    if (!file || !category || !finalName) {
-      return alert('Please provide all required fields.');
+    if (!file || !region || !country || !category || !finalName) {
+      return alert('Please fill in all required fields.');
     }
 
     const formData = new FormData();
     formData.append('file', file);
+    formData.append('region', region);
+    formData.append('country', country);
     formData.append('category', category);
     formData.append('name', finalName);
     formData.append('chartType', chartType);
@@ -67,6 +78,34 @@ const UploadChart = () => {
 
       <form onSubmit={handleSubmit(onSubmit)}>
         <Stack spacing={2}>
+
+          {/* Region */}
+          <FormControl fullWidth required>
+            <InputLabel>Region</InputLabel>
+            <Controller
+              control={control}
+              name="region"
+              render={({ field }) => (
+                <Select {...field} label="Region">
+                  {regionOptions.map((region) => (
+                    <MenuItem key={region} value={region}>{region}</MenuItem>
+                  ))}
+                </Select>
+              )}
+            />
+          </FormControl>
+
+          {/* Country */}
+          <Controller
+            control={control}
+            name="country"
+            rules={{ required: true }}
+            render={({ field }) => (
+              <TextField {...field} fullWidth required label="Country" />
+            )}
+          />
+
+          {/* Category */}
           <FormControl fullWidth required>
             <InputLabel>Chart Category</InputLabel>
             <Controller
@@ -82,6 +121,7 @@ const UploadChart = () => {
             />
           </FormControl>
 
+          {/* Name */}
           {selectedCategory && (
             <FormControl fullWidth required>
               <InputLabel>Chart Name</InputLabel>
@@ -100,15 +140,19 @@ const UploadChart = () => {
             </FormControl>
           )}
 
+          {/* Custom Name */}
           {selectedName === 'Other' && (
-            <TextField
-              fullWidth
-              required
-              label="Custom Chart Name"
-              {...control.register('customName')}
+            <Controller
+              control={control}
+              name="customName"
+              rules={{ required: true }}
+              render={({ field }) => (
+                <TextField {...field} fullWidth required label="Custom Chart Name" />
+              )}
             />
           )}
 
+          {/* Chart Type */}
           <FormControl fullWidth required>
             <InputLabel>Chart Type</InputLabel>
             <Controller
@@ -126,6 +170,7 @@ const UploadChart = () => {
             />
           </FormControl>
 
+          {/* Chart Subtype */}
           <FormControl fullWidth>
             <InputLabel>Chart Subtype</InputLabel>
             <Controller
@@ -141,6 +186,7 @@ const UploadChart = () => {
             />
           </FormControl>
 
+          {/* File Upload */}
           <input
             type="file"
             accept=".xlsx,.xls,.csv"
