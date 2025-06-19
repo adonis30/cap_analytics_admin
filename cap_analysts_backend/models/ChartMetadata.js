@@ -5,6 +5,16 @@ const ChartMetadataSchema = new mongoose.Schema({
   sheetName: { type: String },
   sourceFileName: { type: String },
   uploadedAt: { type: Date, default: Date.now },
+  region: {
+    type: String,
+    enum: ["Global", "Africa", "Asia", "Europe", "North America", "South America"],
+    required: true,
+  },
+  country: {
+    type: String,
+    required: true,
+    trim: true,
+  },
 
   category: {
     type: String,

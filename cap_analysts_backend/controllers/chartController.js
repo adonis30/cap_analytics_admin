@@ -1,8 +1,19 @@
+import { createRequire } from 'node:module';
+const require = createRequire(import.meta.url);
+
 import { format } from 'date-fns';
 import * as XLSX from 'xlsx';
-import ChartMetadata from "../models/ChartMetadata.js";
-import ChartData from "../models/ChartData.js";
+import countries from 'i18n-iso-countries';
 
+const enLocale = require('i18n-iso-countries/langs/en.json');
+countries.registerLocale(enLocale);
+
+ 
+import ChartMetadata from '../models/ChartMetadata.js';
+import ChartData from '../models/ChartData.js';
+ 
+
+// Helper to convert Excel date serials to ISO
 const excelDateToISO = (excelSerial) => {
   const date = new Date((excelSerial - 25569) * 86400 * 1000);
   return date.toISOString();
@@ -14,11 +25,35 @@ export const uploadChartData = async (req, res) => {
       return res.status(400).json({ error: "No file uploaded" });
     }
 
-    const { category, name, chartType, chartSubtype } = req.body;
+    const {
+      category,
+      name,
+      chartType,
+      chartSubtype,
+      region,
+      country
+    } = req.body;
+
+    const validRegions = ["Global", "Africa", "Asia", "Europe", "North America", "South America"];
     const validCategories = ["Macroeconomic Overview", "Business Climate", "Investment Trends"];
+
+    if (!region || !validRegions.includes(region)) {
+      return res.status(400).json({ error: "Invalid or missing region" });
+    }
+
+    if (!country) {
+      return res.status(400).json({ error: "Country is required" });
+    }
+
+    const countryCode = countries.getAlpha3Code(country.trim(), 'en');
+    if (!countryCode) {
+      return res.status(400).json({ error: `Invalid country: ${country}` });
+    }
+
     if (!category || !validCategories.includes(category)) {
       return res.status(400).json({ error: "Invalid or missing chart category" });
     }
+
     if (!name) {
       return res.status(400).json({ error: "Chart name is required" });
     }
@@ -38,9 +73,9 @@ export const uploadChartData = async (req, res) => {
     const normalizedData = rows.map((row) => {
       const obj = {};
       headers.forEach((key, i) => {
-        let value = row[i];
+        const value = row[i];
         if ((key === "month_year" || key === "month") && typeof value === "number") {
-          const isoString = new Date((value - 25569) * 86400 * 1000).toISOString();
+          const isoString = excelDateToISO(value);
           const formatted = format(new Date(isoString), "MMM-yyyy");
           obj["month_year"] = isoString;
           obj["display_month"] = formatted;
@@ -55,11 +90,11 @@ export const uploadChartData = async (req, res) => {
       return res.status(400).json({ error: "No usable data after cleanup" });
     }
 
-    // 🔍 Check if metadata already exists
-    let metadata = await ChartMetadata.findOne({ category, name });
+    // Check if metadata already exists
+    let metadata = await ChartMetadata.findOne({ category, name, region, country: countryCode });
 
     if (metadata) {
-       
+      // Update metadata info (don't delete existing data)
       metadata.uploadedAt = new Date();
       metadata.sheetName = defaultSheetName;
       metadata.sourceFileName = req.file.originalname;
@@ -67,7 +102,6 @@ export const uploadChartData = async (req, res) => {
       metadata.chartSubtype = chartSubtype || metadata.chartSubtype;
       await metadata.save();
     } else {
-      // 🆕 Create new metadata
       metadata = await ChartMetadata.create({
         title: defaultSheetName || req.file.originalname,
         sheetName: defaultSheetName,
@@ -75,27 +109,21 @@ export const uploadChartData = async (req, res) => {
         uploadedAt: new Date(),
         category,
         name,
+        region,
+        country: countryCode,
         chartType: chartType || "line",
         chartSubtype: chartSubtype || "default",
       });
     }
 
-    // 🔁 Upsert each row by unique key (e.g. month_year if present)
-    for (const entry of normalizedData) {
-      const query = {
-        metadataId: metadata._id,
-        ...(entry.month_year && { month_year: entry.month_year }),
-      };
-
-      await ChartData.findOneAndUpdate(
-        query,
-        { ...entry, metadataId: metadata._id },
-        { upsert: true, new: true, setDefaultsOnInsert: true }
-      );
-    }
+    // Append new data entries (do not delete previous)
+    await ChartData.insertMany(normalizedData.map((entry) => ({
+      ...entry,
+      metadataId: metadata._id,
+    })));
 
     res.status(201).json({
-      message: "Chart data uploaded successfully (upserted)",
+      message: "Chart data uploaded successfully",
       metadataId: metadata._id,
       recordCount: normalizedData.length,
     });
@@ -105,8 +133,6 @@ export const uploadChartData = async (req, res) => {
     res.status(500).json({ error: "Failed to process uploaded chart data" });
   }
 };
-
-
 
 
 export const getChartDataByMetadataId = async (req, res) => {
@@ -202,11 +228,7 @@ export const getChartsByCategory = async (req, res) => {
     if (chartType) {
       match.chartType = chartType;
     }
-
-    // Optional: Add year range filtering if you store a date/year field
-    // You must extract and store a proper `year` field in the database for this
-    // e.g., match.year = { $gte: Number(startYear), $lte: Number(endYear) }
-
+ 
     const metadataList = await ChartMetadata.find(match);
     const metadataIds = metadataList.map((m) => m._id);
 
