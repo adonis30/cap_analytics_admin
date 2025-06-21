@@ -31,21 +31,28 @@ export const uploadChartData = async (req, res) => {
       chartType,
       chartSubtype,
       region,
-      country
+      country,
     } = req.body;
 
-    const validRegions = ["Global", "Africa", "Asia", "Europe", "North America", "South America"];
-    const validCategories = ["Macroeconomic Overview", "Business Climate", "Investment Trends"];
+    const validRegions = [
+      "Global", "Africa", "Asia", "Europe", "North America", "South America",
+    ];
+    const validCategories = [
+      "Macroeconomic Overview", "Business Climate", "Investment Trends",
+    ];
 
     if (!region || !validRegions.includes(region)) {
       return res.status(400).json({ error: "Invalid or missing region" });
     }
 
-    if (!country) {
-      return res.status(400).json({ error: "Country is required" });
+    if (region !== "Global" && !country) {
+      return res.status(400).json({ error: "Country is required for non-global charts" });
     }
 
-    const countryCode = countries.getAlpha3Code(country.trim(), 'en');
+    const countryCode = region === "Global"
+      ? "GLB"
+      : countries.getAlpha3Code(country.trim(), "en");
+
     if (!countryCode) {
       return res.status(400).json({ error: `Invalid country: ${country}` });
     }
@@ -58,6 +65,7 @@ export const uploadChartData = async (req, res) => {
       return res.status(400).json({ error: "Chart name is required" });
     }
 
+    // Step 1: Parse file
     const buffer = req.file.buffer;
     const workbook = XLSX.read(buffer, { type: "buffer" });
     const defaultSheetName = workbook.SheetNames[0];
@@ -70,15 +78,19 @@ export const uploadChartData = async (req, res) => {
       h ? h.toString().trim().toLowerCase().replace(/[^\w]+/g, "_") : `column_${i}`
     );
 
-    const normalizedData = rows.map((row) => {
+    let normalizedData = rows.map((row) => {
       const obj = {};
       headers.forEach((key, i) => {
         const value = row[i];
+
         if ((key === "month_year" || key === "month") && typeof value === "number") {
           const isoString = excelDateToISO(value);
           const formatted = format(new Date(isoString), "MMM-yyyy");
           obj["month_year"] = isoString;
           obj["display_month"] = formatted;
+        } else if (key === "country" && typeof value === "string") {
+          const iso = countries.getAlpha3Code(value.trim(), "en");
+          obj["country"] = iso || value;
         } else if (value !== "") {
           obj[key] = value;
         }
@@ -86,15 +98,29 @@ export const uploadChartData = async (req, res) => {
       return obj;
     }).filter((row) => Object.keys(row).length >= 2);
 
+    // ✅ Final pass: ensure map charts only contain ISO Alpha-3 codes
+    if (chartType === "map" || chartSubtype === "choropleth") {
+      normalizedData = normalizedData.map((entry) => {
+        const original = entry.country;
+        const iso = countries.getAlpha3Code(original, "en");
+        if (iso) entry.country = iso;
+        return entry;
+      });
+    }
+
     if (normalizedData.length === 0) {
       return res.status(400).json({ error: "No usable data after cleanup" });
     }
 
-    // Check if metadata already exists
-    let metadata = await ChartMetadata.findOne({ category, name, region, country: countryCode });
+    // Step 2: Upsert metadata
+    let metadata = await ChartMetadata.findOne({
+      category,
+      name,
+      region,
+      country: countryCode,
+    });
 
     if (metadata) {
-      // Update metadata info (don't delete existing data)
       metadata.uploadedAt = new Date();
       metadata.sheetName = defaultSheetName;
       metadata.sourceFileName = req.file.originalname;
@@ -116,18 +142,19 @@ export const uploadChartData = async (req, res) => {
       });
     }
 
-    // Append new data entries (do not delete previous)
-    await ChartData.insertMany(normalizedData.map((entry) => ({
-      ...entry,
-      metadataId: metadata._id,
-    })));
+    // Step 3: Insert records
+    await ChartData.insertMany(
+      normalizedData.map((entry) => ({
+        ...entry,
+        metadataId: metadata._id,
+      }))
+    );
 
     res.status(201).json({
       message: "Chart data uploaded successfully",
       metadataId: metadata._id,
       recordCount: normalizedData.length,
     });
-
   } catch (err) {
     console.error("Upload error:", err);
     res.status(500).json({ error: "Failed to process uploaded chart data" });

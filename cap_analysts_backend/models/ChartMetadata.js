@@ -12,7 +12,6 @@ const ChartMetadataSchema = new mongoose.Schema({
   },
   country: {
     type: String,
-    required: true,
     trim: true,
   },
 
@@ -30,7 +29,7 @@ const ChartMetadataSchema = new mongoose.Schema({
 
   chartType: {
     type: String,
-    enum: ["line", "bar", "pie", "area", "combo"],
+    enum: ["line", "bar", "pie", "area", "combo", "map" ],
     default: "line",
   },
  chartSubtype: {
@@ -51,7 +50,10 @@ const ChartMetadataSchema = new mongoose.Schema({
     'donut',
 
     // ✅ Combo chart subtypes
-    'line-bar', 'area-bar', 'multi-axis'
+    'line-bar', 'area-bar', 'multi-axis',
+
+    // ✅ Map chart subtypes
+    'choropleth',
   ],
   default: 'default',
 },
