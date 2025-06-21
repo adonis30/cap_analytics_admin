@@ -1,5 +1,15 @@
 import React from 'react';
-import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import {
+  PieChart,
+  Pie,
+  Cell,
+  Tooltip,
+  Legend,
+  ResponsiveContainer
+} from 'recharts';
+
+import { formatLabelKey } from 'utils/formatLabelKey';
+import { formatValue } from 'utils/formatValue';
 
 const PieChartComponent = ({ title, data, dataKey, nameKey, colors }) => (
   <ResponsiveContainer width="100%" height={300}>
@@ -11,15 +21,34 @@ const PieChartComponent = ({ title, data, dataKey, nameKey, colors }) => (
         cx="50%"
         cy="50%"
         outerRadius={100}
-        fill="#8884d8"
-        label
+        label={({ name, value }) =>
+          `${formatLabelKey(name)}: ${formatValue(value, {
+            prefix: "$",
+            notation: "compact",
+            currency: true,
+          })}`
+        }
       >
         {data.map((entry, index) => (
-          <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
+          <Cell
+            key={`cell-${index}`}
+            fill={colors[index % colors.length]}
+          />
         ))}
       </Pie>
-      <Tooltip />
-      <Legend />
+      <Tooltip
+        formatter={(value, name) => [
+          formatValue(value, {
+            prefix: "$",
+            notation: "compact",
+            currency: true,
+          }),
+          formatLabelKey(name),
+        ]}
+      />
+      <Legend
+        formatter={formatLabelKey}
+      />
     </PieChart>
   </ResponsiveContainer>
 );

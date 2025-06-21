@@ -17,6 +17,7 @@ const chartTypeOptions = {
   pie: ['default', 'donut'],
   area: ['default', 'spline'],
   combo: ['line-bar', 'area-bar', 'multi-axis'],
+  map: ['choropleth'],
 };
 
 const UploadChart = () => {
@@ -36,28 +37,44 @@ const UploadChart = () => {
     },
   });
 
+  const region = watch('region');
   const selectedCategory = watch('category');
   const selectedName = watch('name');
   const selectedChartType = watch('chartType');
 
-  const { data: nameResponse = {}, isFetching: fetchingNames } = useGetChartNamesByCategoryQuery(selectedCategory, {
-    skip: !selectedCategory,
-  });
+  const { data: nameResponse = {}, isFetching: fetchingNames } =
+    useGetChartNamesByCategoryQuery(selectedCategory, {
+      skip: !selectedCategory,
+    });
 
   const dynamicNames = nameResponse.names || [];
 
   const onSubmit = async ({
-    region, country, category, name, customName, chartType, chartSubtype
+    region,
+    country,
+    category,
+    name,
+    customName,
+    chartType,
+    chartSubtype,
   }) => {
     const finalName = name === 'Other' ? customName : name;
-    if (!file || !region || !country || !category || !finalName) {
+
+    const isMapChart = chartType === 'map';
+    const isGlobal = region === 'Global';
+
+    if (!file || !region || !category || !finalName) {
       return alert('Please fill in all required fields.');
+    }
+
+    if (!isGlobal && !country) {
+      return alert('Please specify a country for non-global charts.');
     }
 
     const formData = new FormData();
     formData.append('file', file);
     formData.append('region', region);
-    formData.append('country', country);
+    if (!isGlobal) formData.append('country', country); // Skip if Global
     formData.append('category', category);
     formData.append('name', finalName);
     formData.append('chartType', chartType);
@@ -74,11 +91,12 @@ const UploadChart = () => {
 
   return (
     <Box m="1.5rem 2.5rem">
-      <Typography variant="h4" mb={2}>Upload Chart Data</Typography>
+      <Typography variant="h4" mb={2}>
+        Upload Chart Data
+      </Typography>
 
       <form onSubmit={handleSubmit(onSubmit)}>
         <Stack spacing={2}>
-
           {/* Region */}
           <FormControl fullWidth required>
             <InputLabel>Region</InputLabel>
@@ -88,22 +106,26 @@ const UploadChart = () => {
               render={({ field }) => (
                 <Select {...field} label="Region">
                   {regionOptions.map((region) => (
-                    <MenuItem key={region} value={region}>{region}</MenuItem>
+                    <MenuItem key={region} value={region}>
+                      {region}
+                    </MenuItem>
                   ))}
                 </Select>
               )}
             />
           </FormControl>
 
-          {/* Country */}
-          <Controller
-            control={control}
-            name="country"
-            rules={{ required: true }}
-            render={({ field }) => (
-              <TextField {...field} fullWidth required label="Country" />
-            )}
-          />
+          {/* Country (optional if Global) */}
+          {region !== 'Global' && (
+            <Controller
+              control={control}
+              name="country"
+              rules={{ required: region !== 'Global' }}
+              render={({ field }) => (
+                <TextField {...field} fullWidth required label="Country" />
+              )}
+            />
+          )}
 
           {/* Category */}
           <FormControl fullWidth required>
@@ -131,7 +153,9 @@ const UploadChart = () => {
                 render={({ field }) => (
                   <Select {...field} label="Chart Name">
                     {dynamicNames.map((item) => (
-                      <MenuItem key={item} value={item}>{item}</MenuItem>
+                      <MenuItem key={item} value={item}>
+                        {item}
+                      </MenuItem>
                     ))}
                     <MenuItem value="Other">Other (Create new name)</MenuItem>
                   </Select>
@@ -179,7 +203,9 @@ const UploadChart = () => {
               render={({ field }) => (
                 <Select {...field} label="Chart Subtype">
                   {chartTypeOptions[selectedChartType]?.map((sub) => (
-                    <MenuItem key={sub} value={sub}>{sub}</MenuItem>
+                    <MenuItem key={sub} value={sub}>
+                      {sub}
+                    </MenuItem>
                   ))}
                 </Select>
               )}
@@ -210,3 +236,5 @@ const UploadChart = () => {
 };
 
 export default UploadChart;
+// This code defines a React component for uploading chart data, allowing users to select various options like region, country, category, chart name, type, and subtype. It uses Material-UI for styling and React Hook Form for form management. The component handles file uploads and submits the data to an API endpoint using a mutation hook from a Redux slice. It also includes error handling and loading states.
+// The component is designed to be user-friendly, guiding users through the upload process with clear labels

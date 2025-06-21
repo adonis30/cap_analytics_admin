@@ -1,5 +1,3 @@
-// ChoroplethMapComponent.jsx
-
 import React, { useRef, useEffect } from "react";
 import * as d3 from "d3";
 import * as topojson from "topojson-client";
@@ -30,21 +28,27 @@ const ChoroplethMapComponent = ({
 
     svg.call(zoom);
 
-    const maxValue = d3.max(Object.values(regionValues));
-    const colorScale = d3
-      .scaleSequential()
-      .domain([0, maxValue || 1])
-      .interpolator(d3.interpolateBlues);
+    // ✅ Custom color scale - vibrant
+    const values = Object.values(regionValues).map(Number).filter(Boolean);
+    const maxValue = d3.max(values) || 1;
+    const minValue = d3.min(values) || 0;
 
+    const colorScale = d3.scaleSequential()
+      .domain([minValue, maxValue])
+      .interpolator(d3.interpolatePlasma); // Options: interpolateViridis, interpolateCool, interpolateInferno
+
+    // ✅ Tooltip
     const tooltip = d3
       .select("body")
       .append("div")
       .attr("class", "map-tooltip")
       .style("position", "absolute")
-      .style("padding", "6px 12px")
-      .style("background", "#333")
+      .style("padding", "8px 14px")
+      .style("background", "rgba(0,0,0,0.85)")
       .style("color", "#fff")
-      .style("border-radius", "4px")
+      .style("fontSize", "0.875rem")
+      .style("borderRadius", "6px")
+      .style("boxShadow", "0 2px 8px rgba(0,0,0,0.4)")
       .style("pointer-events", "none")
       .style("opacity", 0);
 
@@ -69,14 +73,24 @@ const ChoroplethMapComponent = ({
         const countryName = d.properties.name;
         const value = regionValues[isoCode];
 
+        const formattedKey = dataKey
+          .replace(/_/g, " ")
+          .replace(/\b\w/g, (c) => c.toUpperCase());
+
+        const formattedValue =
+          typeof value === "number"
+            ? new Intl.NumberFormat("en-US", {
+                notation: "compact",
+                maximumFractionDigits: 2,
+              }).format(value)
+            : "No data";
+
         tooltip
           .html(
-            `<strong>${countryName}</strong><br/>Charts: ${
-              value != null ? value : "No data"
-            }`
+            `<strong>${countryName}</strong><br/>${formattedKey}: ${formattedValue}`
           )
-          .style("left", `${event.pageX + 10}px`)
-          .style("top", `${event.pageY - 28}px`)
+          .style("left", `${event.pageX + 12}px`)
+          .style("top", `${event.pageY - 40}px`)
           .style("opacity", 1);
       })
       .on("mouseout", () => {
@@ -87,7 +101,7 @@ const ChoroplethMapComponent = ({
           d.properties.ISO_A3 || d.id || d.properties["ISO3166-1-Alpha-3"];
         if (onCountryClick) onCountryClick(isoCode);
       });
-  }, [geoJson, regionValues]);
+  }, [geoJson, regionValues, dataKey]);
 
   return (
     <div style={{ width: "100%", overflowX: "auto" }}>

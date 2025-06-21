@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useRef } from "react";
 import {
   Box,
   Typography,
@@ -15,14 +15,13 @@ import {
 
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
-import { useRef } from "react";
+import { useNavigate } from "react-router-dom";
 
 import ChoroplethMapComponent from "components/chartsView/ChoroplethMapComponent";
 import ChartPreview from "./ChartPreview";
 import Header from "components/Header";
 import worldGeoJson from "utils/world-geo.json";
 import countries from "utils/isoCountries";
-import { useNavigate } from "react-router-dom";
 
 import {
   useGetChartMetadataQuery,
@@ -37,15 +36,16 @@ const categories = [
 
 const ChartExplorer = () => {
   const theme = useTheme();
+  const navigate = useNavigate();
+  const chartsRef = useRef();
+
   const [selectedCountry, setSelectedCountry] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState("");
   const [chartType, setChartType] = useState("");
   const [startYear, setStartYear] = useState("");
   const [endYear, setEndYear] = useState("");
-  const navigate = useNavigate();
 
-  const { data: metadataList = [], isFetching: loadingMeta } =
-    useGetChartMetadataQuery();
+  const { data: metadataList = [], isFetching: loadingMeta } = useGetChartMetadataQuery();
 
   const {
     data: charts = [],
@@ -56,9 +56,9 @@ const ChartExplorer = () => {
     { skip: !selectedCategory }
   );
 
-  const handleCountryClick = (isoCode) => setSelectedCountry(isoCode);
-
-  const chartsRef = useRef();
+  const handleCountryClick = (isoCode) => {
+    setSelectedCountry(isoCode || "GLB");
+  };
 
   const exportAllChartsToPDF = async () => {
     if (!chartsRef.current) return;
@@ -67,7 +67,6 @@ const ChartExplorer = () => {
     const pdf = new jsPDF("p", "mm", "a4");
     const width = 210;
     const height = (canvas.height * width) / canvas.width;
-
     pdf.addImage(imgData, "PNG", 0, 10, width, height);
     pdf.save(`charts_${selectedCountry}.pdf`);
   };
@@ -81,29 +80,40 @@ const ChartExplorer = () => {
     return scores;
   }, [metadataList]);
 
-  const filteredCharts = useMemo(() => {
-    if (!selectedCountry) return [];
 
-    return metadataList
-      .filter(
-        (meta) =>
-          meta.country === selectedCountry &&
-          (!selectedCategory || meta.category === selectedCategory) &&
-          (!chartType || meta.chartType === chartType)
-      )
-      .map((meta) => {
-        const match = charts.find(
-          (d) =>
-            String(d._id) === String(meta._id) ||
-            String(d.metadataId) === String(meta._id)
-        );
+ const filteredCharts = useMemo(() => {
+  if (!selectedCountry) return [];
 
-        return {
-          metadata: meta,
-          data: match?.data || [],
-        };
-      });
-  }, [metadataList, charts, selectedCountry, selectedCategory, chartType]);
+  return metadataList
+    .filter((meta) => {
+      const isGlobalMap =
+        (meta.chartType === "map" || meta.chartSubtype === "choropleth") &&
+        meta.country === "GLB";
+
+      const isMatchingCountry = meta.country === selectedCountry;
+
+      const isMatchingType = !chartType || meta.chartType === chartType;
+      const isMatchingCategory =
+        !selectedCategory || meta.category === selectedCategory;
+
+      return (isMatchingCountry || isGlobalMap) && isMatchingType && isMatchingCategory;
+    })
+    .map((meta) => {
+      const match = charts.find(
+        (d) =>
+          String(d._id) === String(meta._id) ||
+          String(d.metadataId) === String(meta._id)
+      );
+
+      return {
+        metadata: meta,
+        data: match?.data || [],
+      };
+    });
+}, [metadataList, charts, selectedCountry, selectedCategory, chartType]);
+
+
+   
 
   return (
     <Box m="1.5rem 2.5rem">
@@ -126,8 +136,7 @@ const ChartExplorer = () => {
         <>
           <Divider sx={{ my: 3 }} />
           <Typography variant="h5" gutterBottom>
-            Charts for{" "}
-            {countries.getName(selectedCountry, "en") || selectedCountry}
+            Charts for {countries.getName(selectedCountry, "en") || selectedCountry}
           </Typography>
 
           <Grid container spacing={2} alignItems="center" mt={1} mb={2}>
@@ -167,6 +176,7 @@ const ChartExplorer = () => {
                   <MenuItem value="area">Area</MenuItem>
                   <MenuItem value="pie">Pie</MenuItem>
                   <MenuItem value="combo">Combo</MenuItem>
+                  <MenuItem value="map">Map</MenuItem>
                 </Select>
               </FormControl>
             </Grid>
@@ -175,7 +185,7 @@ const ChartExplorer = () => {
               <Button
                 variant="contained"
                 color="primary"
-                onClick={() => navigate('/charts/create')}
+                onClick={() => navigate("/charts/create")}
               >
                 Upload Chart Data
               </Button>
@@ -198,7 +208,6 @@ const ChartExplorer = () => {
                 <CircularProgress />
               </Box>
             ) : filteredCharts.length > 0 ? (
-              
               <Box
                 display="grid"
                 gridTemplateColumns="repeat(auto-fill, minmax(600px, 1fr))"
@@ -232,5 +241,5 @@ const ChartExplorer = () => {
 };
 
 export default ChartExplorer;
-// This file is part of the React application for chart exploration.
-// It allows users to select a country on a map and view available charts based on that selection
+// This code is a React component for a chart explorer that allows users to view and filter charts based on country, category, and chart type. It includes a choropleth map for selecting countries and displays charts in a grid format. Users can also export all charts to a PDF file.
+// It uses Material-UI for styling and layout, and integrates with a Redux API slice to fetch chart metadata and data. The component handles loading states and displays appropriate messages when no charts are found or when data is being fetched.
