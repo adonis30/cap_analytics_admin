@@ -32,9 +32,11 @@ dotenv.config();
 const app = express();
 const allowedOrigins = [
   'http://localhost:3000',
-  '31.97.177.190:3000',
+  'http://31.97.177.190:3000',
   'https://cap-analytics-admin-1.onrender.com',
   'https://cap-analytics-admin.vercel.app',
+  'https://admin.capanalytics.site',  
+  'https://api.capanalytics.site',   
 ];
 app.use(express.json());
 app.use(helmet());
