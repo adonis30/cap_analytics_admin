@@ -46,19 +46,16 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(cors({
   origin: function (origin, callback) {
+    console.log("CORS request origin:", origin); // Add this
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
+      console.error("Blocked CORS origin:", origin); // And this
       callback(new Error('Not allowed by CORS'));
     }
   },
-  credentials: true, // if you're sending cookies/auth
+  credentials: true,
 }));
-
- 
-app.get("/", (req, res) => {
-  res.status(200).send("CapAnalytics API is up and running.");
-});
 
 
 /* ROUTES */
