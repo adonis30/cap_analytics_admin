@@ -53,7 +53,7 @@ const ChartMetadataSchema = new mongoose.Schema({
     'line-bar', 'area-bar', 'multi-axis',
 
     // ✅ Map chart subtypes
-    'choropleth',
+    'choropleth', 'heatmap', 'bubble_map'
   ],
   default: 'default',
 },

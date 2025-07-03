@@ -32,6 +32,7 @@ dotenv.config();
 const app = express();
 const allowedOrigins = [
   'http://localhost:3000',
+  '31.97.177.190:3000',
   'https://cap-analytics-admin-1.onrender.com',
   'https://cap-analytics-admin.vercel.app',
 ];
@@ -53,6 +54,9 @@ app.use(cors({
 }));
 
  
+app.get("/", (req, res) => {
+  res.status(200).send("CapAnalytics API is up and running.");
+});
 
 
 /* ROUTES */
