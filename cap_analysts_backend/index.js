@@ -6,6 +6,8 @@ import cors from "cors";
 import dotenv from "dotenv";
 import helmet from "helmet";
 import morgan from "morgan";
+
+// Route imports
 import clientRoutes from "./routes/client.js";
 import generalRoutes from "./routes/general.js";
 import fundingRoutes from "./routes/funding.js";
@@ -18,49 +20,61 @@ import userRoutes from "./routes/user.js";
 import authRouter from "./routes/auth.routes.js";
 import categoryRoutes from "./routes/category.js";
 import uploadRoutes from "./routes/uploadRoutes.js";
-import imageRoutes from './routes/imageRoutes.js';
-import sdgFocusRoutes from './routes/sdgFocusRoutes.js';
-import ticketSize from './routes/ticketSize.js';
-import investmentAsk from './routes/investmentAsk.js'; // Importing the investment ask routes
-import sector from './routes/sector.js';
+import imageRoutes from "./routes/imageRoutes.js";
+import sdgFocusRoutes from "./routes/sdgFocusRoutes.js";
+import ticketSize from "./routes/ticketSize.js";
+import investmentAsk from "./routes/investmentAsk.js";
+import sector from "./routes/sector.js";
 import chartRoutes from "./routes/chartRoutes.js";
-import errorMiddleware from "./middlewares/error.middleware.js";
- 
 
-/* CONFIGURATION */
+// Middleware
+import errorMiddleware from "./middlewares/error.middleware.js";
+
+// Load environment variables
 dotenv.config();
+
+// App instance
 const app = express();
+
+// === CORS ORIGIN SETUP ===
 const allowedOrigins = [
-  'http://localhost:3000', // for local development
-  'http://31.97.177.190:3000', // local network test if still needed
+  'http://localhost:3000',
+  'http://31.97.177.190:3000',
   'https://cap-analytics-admin-1.onrender.com',
   'https://cap-analytics-admin.vercel.app',
   'https://admin.capanalytics.site',
   'https://api.capanalytics.site',
   'https://capanalytics.site',
-  'https://www.capanalytics.site', 
-]
-app.use(express.json());
-app.use(helmet());
-app.use(helmet.crossOriginResourcePolicy({ policy: "cross-origin" }));
-app.use(morgan("common"));
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(cookieParser());
-app.use(cors({
-  origin: function (origin, callback) {
-    console.log("CORS request origin:", origin); // Add this
+  'https://www.capanalytics.site',
+];
+
+const corsOptions = {
+  origin: (origin, callback) => {
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
-      console.error("Blocked CORS origin:", origin); // And this
-      callback(new Error('Not allowed by CORS'));
+      console.error(`Blocked CORS origin: ${origin}`);
+      callback(new Error("Not allowed by CORS"));
     }
   },
   credentials: true,
-}));
+};
 
+// === MIDDLEWARE ===
+app.use(express.json());
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(cookieParser());
+app.use(helmet());
+app.use(helmet.crossOriginResourcePolicy({ policy: "cross-origin" }));
+app.use(morgan("common"));
+app.use(cors(corsOptions));
 
-/* ROUTES */
+// === HEALTH CHECK ===
+app.get("/", (req, res) => {
+  res.status(200).send("Cap Analytics API is running...");
+});
+
+// === ROUTES ===
 app.use("/api/v1/client", clientRoutes);
 app.use("/api/v1/general", generalRoutes);
 app.use("/api/v1/management", managementRoutes);
@@ -72,40 +86,29 @@ app.use("/api/v1/user", userRoutes);
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/employees", peopleRoutes);
 app.use("/api/v1/upload", uploadRoutes);
+app.use("/api/v1/images", imageRoutes);
 app.use("/api/v1/sdgFocus", sdgFocusRoutes);
 app.use("/api/v1/sectors", sector);
 app.use("/api/v1/ticketSize", ticketSize);
 app.use("/api/v1/investmentAsk", investmentAsk);
-
-
-
-// Use image routes
-app.use('/api/v1/images', imageRoutes);
 app.use("/api/v1/charts", chartRoutes);
 app.use("/api/v1/categories", categoryRoutes);
 
-
-
-/* ERROR HANDLING */
+// === ERROR HANDLER ===
 app.use(errorMiddleware);
 
-
-
- 
-
-
-/* MONGOOSE SETUP */
+// === DATABASE + SERVER ===
 const PORT = process.env.PORT || 9000;
+
 mongoose
   .connect(process.env.MONGO_URL, {
-    
+   
   })
   .then(() => {
-    app.listen(PORT, () => console.log(`Server running at Port: ${PORT}`));
-
-    // Only add data one time
-    // User.insertMany(dataUser);
+    app.listen(PORT, () =>
+      console.log(`✅ Server running at http://localhost:${PORT}`)
+    );
   })
-  .catch((error) => console.log(`${error} did not connect`));
-
- 
+  .catch((error) => {
+    console.error("❌ MongoDB connection failed:", error.message);
+  });
