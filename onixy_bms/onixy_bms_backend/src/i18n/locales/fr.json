@@ -1,0 +1,20 @@
+{
+  "auth.invalid_credentials": "Identifiants invalides",
+  "auth.login_success": "Connexion réussie",
+  "auth.missing_fields": "L’e-mail et le mot de passe sont requis",
+  "error.unauthorized": "Accès non autorisé",
+  "error.server": "Erreur interne du serveur",
+
+  "error.not_found": "Ressource introuvable",
+  "error.forbidden": "Accès interdit",
+  "error.bad_request": "Mauvaise requête",
+  "error.conflict": "Conflit détecté",
+  "error.unknown": "Erreur inconnue",
+
+  "error.validation": "Erreur de validation",
+  "error.timeout": "Délai d’attente dépassé",
+  "error.service_unavailable": "Service indisponible",
+  "error.gateway_timeout": "Délai d’attente de la passerelle dépassé",
+  "error.too_many_requests": "Trop de requêtes",
+  "error.not_implemented": "Non implémenté"
+}

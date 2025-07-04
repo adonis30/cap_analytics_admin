@@ -1,0 +1,13 @@
+{
+  "greeting": "Welcome to Nix BMS",
+  "description": "Nix Business Management System",
+  "LanguageSwitcher": {
+    "label": "Language",
+    "en": "English",
+    "fr": "French",
+    "zh": "German"
+  },
+  "common": {
+    "dashboard": "Dashboard"
+  }
+}

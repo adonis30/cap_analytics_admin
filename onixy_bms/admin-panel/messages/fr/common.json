@@ -1,0 +1,126 @@
+{
+  "greeting": "Bienvenue sur Nix BMS",
+  "description": "Système de gestion d'entreprise Nix",
+
+  "dashboard": "Tableau de bord",
+
+  "label": "Mon compte",
+  "profile": "Profil",
+  "billing": "Facturation",
+  "team": "Équipe",
+  "settings": "Paramètres",
+  "subscription": "Abonnement",
+  "logout": "Se déconnecter",
+
+  "light": "Clair",
+  "dark": "Sombre",
+  "system": "Système",
+
+  "application": "Application",
+
+  "title": {
+    "title": "Nix BMS",
+    "hr": "Ressources Humaines",
+  "employeeDirectory": "Annuaire des Employés",
+  "leaveRequests": "Demandes de Congé",
+  "payroll": "Paie",
+  "transport": "Transport",
+  "fleetManagement": "Gestion de Flotte",
+  "driverLogs": "Journaux des Chauffeurs",
+  "warehouse": "Entrepôt",
+  "inventory": "Inventaire",
+  "inbound": "Entrant",
+  "outbound": "Sortant",
+  "workshop": "Atelier",
+  "workOrders": "Ordres de Travail",
+  "maintenanceSchedule": "Planning de Maintenance",
+  "procurement": "Approvisionnement",
+  "suppliers": "Fournisseurs",
+  "purchaseOrders": "Bons de Commande",
+  "businessAdmin": "Administration",
+  "departments": "Départements",
+  "policies": "Politiques",
+  "reportsAnalytics": "Rapports & Analytique",
+  "kpiDashboard": "Tableau de Bord KPI",
+  "monthlyReports": "Rapports Mensuels",
+  "support": "Assistance",
+  "feedback": "Retour",
+  "designEngineering": "Conception & Ingénierie",
+  "salesMarketing": "Ventes & Marketing",
+  "travel": "Voyage"
+  },
+
+  "login": {
+    "title": "Connexion à votre compte",
+    "description": "Veuillez entrer votre adresse e-mail et votre mot de passe pour vous connecter",
+    "email": "Adresse e-mail",
+    "loading": "Connexion en cours...",
+    "password": "Mot de passe",
+    "rememberMe": "Se souvenir de moi",
+    "forgotPassword": "Mot de passe oublié ?",
+    "loginButton": "Connexion",
+    "registerButton": "S'inscrire",
+    "noAccount": "Vous n'avez pas de compte ? ",
+    "errorMessage": "Adresse e-mail ou mot de passe invalide. Veuillez réessayer.",
+    "or": "ou",
+    "loginWithGithub": "Se connecter avec Github",
+    "loginWithFacebook": "Se connecter avec Facebook",
+    "invalidCredentials": "Identifiants invalides",
+    "emailRequired": "L'adresse e-mail est requise",
+    "passwordRequired": "Le mot de passe est requis",
+    "emailInvalid": "Adresse e-mail invalide",
+    "passwordMinLength": "Le mot de passe doit comporter au moins 6 caractères",
+    "accountLocked": "Votre compte a été verrouillé. Veuillez contacter le support.",
+    "accountNotVerified": "Votre compte n'est pas vérifié. Veuillez vérifier votre e-mail pour le lien de vérification",
+    "serverError": "Erreur serveur. Veuillez réessayer plus tard."
+
+  },
+  "register": {
+    "title": "Créer un compte",
+    "name": "Nom",
+    "email": "Adresse e-mail",
+    "password": "Mot de passe",
+    "confirmPassword": "Confirmer le mot de passe",
+    "registerButton": "S'inscrire",
+    "or": "ou",
+    "registerWithGoogle": "S'inscrire avec Google",
+    "registerWithFacebook": "S'inscrire avec Facebook",
+    "emailRequired": "L'adresse e-mail est requise",
+    "passwordRequired": "Le mot de passe est requis",
+    "nameRequired": "Le nom est requis",
+    "emailInvalid": "Adresse e-mail invalide",
+    "passwordMinLength": "Le mot de passe doit comporter au moins 6 caractères"
+  },
+
+  "hr": {
+    "performance":  {
+      "title": "Performance",
+      "description": "Gérez les évaluations de performance des employés"
+    },
+    "leave": {
+      "title": "Congés",
+      "description": "Gérez les demandes de congé des employés"
+    },
+    "payroll": {
+      "title": "Paie",
+      "description": "Gérez la paie des employés"
+    },
+    "documents": {
+      "title": "Documents",
+      "description": "Gérez les documents des employés"
+    },
+    "engagement": {
+      "title": "Engagement",
+      "description": "Gérez l'engagement des employés"
+    },
+    "automation": {
+      "title": "Automatisation",
+      "description": "Automatisez les processus RH"
+    },
+    "reports": {
+      "title": "Rapports",
+      "description": "Générez des rapports RH"
+    }
+  }
+
+}

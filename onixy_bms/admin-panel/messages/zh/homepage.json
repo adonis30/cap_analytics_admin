@@ -1,0 +1,9 @@
+{
+   
+    "greeting": "欢迎使用 Nix BMS",
+    "description": "Nix 商业管理系统",
+ 
+  "common": {
+    "dashboard": "仪表盘"
+  }
+}
