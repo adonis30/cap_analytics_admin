@@ -31,13 +31,15 @@ import errorMiddleware from "./middlewares/error.middleware.js";
 dotenv.config();
 const app = express();
 const allowedOrigins = [
-  'http://localhost:3000',
-  'http://31.97.177.190:3000',
+  'http://localhost:3000', // for local development
+  'http://31.97.177.190:3000', // local network test if still needed
   'https://cap-analytics-admin-1.onrender.com',
   'https://cap-analytics-admin.vercel.app',
-  'https://admin.capanalytics.site',  
-  'https://api.capanalytics.site',   
-];
+  'https://admin.capanalytics.site',
+  'https://api.capanalytics.site',
+  'https://capanalytics.site',
+  'https://www.capanalytics.site', 
+]
 app.use(express.json());
 app.use(helmet());
 app.use(helmet.crossOriginResourcePolicy({ policy: "cross-origin" }));
