@@ -26,6 +26,7 @@ import ticketSize from "./routes/ticketSize.js";
 import investmentAsk from "./routes/investmentAsk.js";
 import sector from "./routes/sector.js";
 import chartRoutes from "./routes/chartRoutes.js";
+import grantsRoutes from "./routes/grants.js"
 
 // Middleware
 import errorMiddleware from "./middlewares/error.middleware.js";
@@ -93,6 +94,7 @@ app.use("/api/v1/ticketSize", ticketSize);
 app.use("/api/v1/investmentAsk", investmentAsk);
 app.use("/api/v1/charts", chartRoutes);
 app.use("/api/v1/categories", categoryRoutes);
+app.use("/api/v1/grants", grantsRoutes);
 
 // === ERROR HANDLER ===
 app.use(errorMiddleware);
