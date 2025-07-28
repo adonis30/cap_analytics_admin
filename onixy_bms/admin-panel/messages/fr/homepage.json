@@ -1,9 +1,0 @@
-{
-   
-    "greeting": "Bienvenue sur Nix BMS",
-    "description": "Système de gestion d'entreprise Nix",
-  
-  "common": {
-    "dashboard": "Tableau de bord"
-  }
-}
