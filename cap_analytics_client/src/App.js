@@ -36,6 +36,8 @@ import CreateEmployeePage from "scenes/employees/create";
 import EditEmployee from "scenes/employees/[id]/update";
 import ChartExplorer from 'scenes/charts/ChartExplorer';
 import CreateCharts from "scenes/charts/create";
+import Grants from "scenes/grants";
+import CreateGrantPage from "scenes/grants/create";
 
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated } = useAuthStore();
@@ -142,6 +144,8 @@ function App() {
               <Route path="/employees/update/:id" element={<EditEmployee />} />
               <Route path="/charts" element={<ChartExplorer />} />
               <Route path="/charts/create" element={<CreateCharts />} />
+              <Route path="/grants" element={<Grants />} />
+              <Route path="/grants/create" element={<CreateGrantPage />} />
 
               {/* Users route */}
               <Route path="/users" element={<Users />} />

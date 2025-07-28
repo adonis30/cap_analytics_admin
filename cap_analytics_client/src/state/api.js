@@ -16,6 +16,7 @@ export const api = createApi({
     "Investor",
     "Category",
     "Upload",
+    "Grants",
   ], // Declare all entities for tagging
   endpoints: (build) => ({
     // User Endpoints
@@ -526,7 +527,45 @@ export const api = createApi({
         { type: "ChartMetadata", id: metadataId },
       ],
     }),
+
+    getAllGrants: build.query({
+      query: () => `${url}grants/`,
+      providesTags: ["Grants"],
+    }),
+
+    getGrantsById: build.query ({
+      query: (id) => `${url}grants/${id}`,
+      providesTags: (result, error, id ) => [{type: "Grants", id}]
+    }),
+
+    deleteGrant: build.mutation({
+      query: (id) => ({
+        url: `${url}grants/${id}`,
+        method: "DELETE",
+      }),
+      providesTags: ["Grants"],
+    }),
+
+    updateGrants: build.mutation ({
+      query: (formData) => ({
+        url: `${url}grants`, 
+        method: "POST",
+        body: formData,
+        formData: true,
+      }),
+      invalidatesTags: ["Grants"], 
+    }),
+    createGrants: build.mutation({
+      query: (newGrants) => ({
+        url: `${url}grants/`,
+        method: "POST",
+        body: newGrants,
+      }),
+      invalidatesTags: ["Grants"],
+    }),
+
   }),
+
 });
 
 // Auto-generated hooks for queries and mutations
@@ -605,4 +644,9 @@ export const {
   useGetChartsByCategoryQuery,
   useGetChartNamesByCategoryQuery,
   useGetAllChartDataQuery,
+  useDeleteGrantMutation,
+  useGetAllGrantsQuery,
+  useGetGrantsByIdQuery,
+  useUpdateGrantsMutation,
+  useCreateGrantsMutation,
 } = api;

@@ -210,6 +210,7 @@ const Sidebar = ({
                   [
                     { text: "tools", icon: <PointOfSaleOutlined /> },
                     { text: "Charts", icon: <ExploreIcon /> },
+                    { text: "Grants", icon: <PointOfSaleOutlined/>},
                     { text: "Monthly", icon: <CalendarMonthOutlined /> },
                     { text: "Breakdown", icon: <PieChartOutlined /> },
                   ],
