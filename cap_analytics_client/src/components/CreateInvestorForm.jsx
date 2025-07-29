@@ -408,25 +408,48 @@ const CreateInvestorForm = ({ investor, investorId }) => {
       ? individualInvestorCategories
       : institutionInvestorCategories;
 
-  const onSubmit = async (data) => {
+
+  const validateForm = (data) => {
+    const newErrors = {};
+    if (!data.name.trim()) newErrors.name = "Name is required";
+    if (!data.email.trim()) {
+      newErrors.email = "Email is required";
+    } else if (!/\S+@\S+\.\S+/.test(data.email)) {
+      newErrors.email = "Enter a valid email";
+    }
+    if (!data.company.trim()) newErrors.company = "Company is required";
+    if (!data.investmentAmount.trim()) {
+      newErrors.investmentAmount = "Investment Amount is required";
+    } else if (isNaN(data.investmentAmount.trim())) {
+      newErrors.investmentAmount = "Must be a valid number";
+    }
+    return newErrors;
+  };
+
+
+
+ const onSubmit = async (data) => {
     setIsSubmitting(true);
 
     try {
-      // 🧠 Determine which image field to update
-      const imageField =
-        data.type === "Individual"
-          ? "individualDetails.imageUrl"
-          : "institutionDetails.imageUrl";
+      // ✅ Trim fields
+      const cleanedData = {
+        ...data,
+        name: data.name.trim(),
+        email: data.email.trim(),
+        phoneNumber: data.phoneNumber.trim(),
+      };
 
-      // 📦 Upload selected file if any
+      // ✅ Upload image if provided
       if (selectedFile) {
         if (!SUPPORTED_FILE_TYPES.includes(selectedFile.type)) {
-          alert("Unsupported file type. Only JPEG or PNG allowed.");
+          alert("Unsupported file type. Only JPEG/PNG allowed.");
+          setIsSubmitting(false);
           return;
         }
-
         if (selectedFile.size > MAX_FILE_SIZE) {
-          alert("Image too large. Must be < 5MB.");
+          alert("Image too large. Max size 5MB.");
+          setIsSubmitting(false);
           return;
         }
 
@@ -438,49 +461,42 @@ const CreateInvestorForm = ({ investor, investorId }) => {
 
         if (!uploadedUrl) {
           alert("Image upload failed.");
+          setIsSubmitting(false);
           return;
         }
 
-        // ✅ Assign uploaded URL to the correct field
-        if (data.type === "Individual") {
-          data.individualDetails.imageUrl = uploadedUrl;
+        if (cleanedData.type === "Individual") {
+          cleanedData.individualDetails.imageUrl = uploadedUrl;
         } else {
-          data.institutionDetails.imageUrl = uploadedUrl;
+          cleanedData.institutionDetails.imageUrl = uploadedUrl;
         }
       }
 
-      // 🧹 Remove any unexpected root-level imageUrl field
-      delete data.imageUrl;
-
-      if (data.type === "Individual") {
-        delete data.institutionDetails;
+      delete cleanedData.imageUrl;
+      if (cleanedData.type === "Individual") {
+        delete cleanedData.institutionDetails;
       } else {
-        delete data.individualDetails;
+        delete cleanedData.individualDetails;
       }
 
-      // 🔄 API Submission
+      // ✅ API call
       const response =
         formMode === "create"
-          ? await createInvestor(data).unwrap()
-          : await updateInvestor({ id: investorId, data }).unwrap();
+          ? await createInvestor(cleanedData).unwrap()
+          : await updateInvestor({ id: investorId, data: cleanedData }).unwrap();
 
-      // ✅ Handle successful submission
       if (response?.success || response?._id) {
         alert(
           `Investor ${formMode === "create" ? "created" : "updated"} successfully!`
         );
+        reset();
+        setSelectedFile(null);
         navigate("/investors");
       } else {
-        alert(
-          "Submission might have failed. Check logs or try again.",
-          response
-        );
+        alert("Submission might have failed. Try again.");
       }
-    } catch (error) {
-      alert(
-        "An error occurred during submission. Please check your network or data.",
-        error.message || error.data?.message || error.error
-      );
+    } catch (err) {
+      alert("Error: " + (err?.message || err?.data?.message || "Something went wrong."));
     } finally {
       setIsSubmitting(false);
     }
