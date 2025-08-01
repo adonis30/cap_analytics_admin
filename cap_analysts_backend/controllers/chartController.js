@@ -79,23 +79,28 @@ export const uploadChartData = async (req, res) => {
     );
 
     let normalizedData = rows.map((row) => {
-      const obj = {};
-      headers.forEach((key, i) => {
-        const value = row[i];
+  const obj = {};
+  headers.forEach((key, i) => {
+    const value = row[i];
 
-        if ((key === "month_year" || key === "month") && typeof value === "number") {
-          const isoString = excelDateToISO(value);
-          const formatted = format(new Date(isoString), "MMM-yyyy");
-          obj["month_year"] = isoString;
-          obj["display_month"] = formatted;
-        } else if (key === "country" && typeof value === "string") {
-          const iso = countries.getAlpha3Code(value.trim(), "en");
-          obj["country"] = iso || value;
-        } else if (value !== "") {
-          obj[key] = value;
-        }
-      });
-      return obj;
+    if (typeof value === "number") {
+      const isoString = excelDateToISO(value);
+      const dateObj = new Date(isoString);
+
+      if (key === "month_year" || key === "month") {
+        obj["month_year"] = isoString;
+        obj["display_month"] = format(dateObj, "MMM-yyyy");
+      } else if (key === "full_date" || key === "day_month_year") {
+        obj[key] = isoString;
+        obj[`display_${key}`] = format(dateObj, "dd-MMM-yyyy");
+      } else {
+        obj[key] = value; // fallback
+      }
+    } else {
+      obj[key] = value;
+    }
+  });
+  return obj;
     }).filter((row) => Object.keys(row).length >= 2);
 
     // ✅ Final pass: ensure map charts only contain ISO Alpha-3 codes
