@@ -528,6 +528,14 @@ export const api = createApi({
       ],
     }),
 
+    deleteChartData: build.mutation ({
+     query: (metadataId) => ({
+      url: `${url}charts/${metadataId}`,
+      method: "DELETE",
+     }),
+     providesTags: ["ChartData"],
+    }),
+
     getAllGrants: build.query({
       query: () => `${url}grants/`,
       providesTags: ["Grants"],
@@ -644,6 +652,7 @@ export const {
   useGetChartsByCategoryQuery,
   useGetChartNamesByCategoryQuery,
   useGetAllChartDataQuery,
+  useDeleteChartDataMutation,
   useDeleteGrantMutation,
   useGetAllGrantsQuery,
   useGetGrantsByIdQuery,

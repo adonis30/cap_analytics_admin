@@ -1,7 +1,15 @@
 import React, { useRef, useMemo } from "react";
-import { Box, Typography, Button, Divider, Stack, Chip } from "@mui/material";
+import {
+  Box,
+  Typography,
+  Button,
+  Divider,
+  Stack,
+  Chip,
+} from "@mui/material";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
+import { useDeleteChartDataMutation } from "state/api"; // ✅ Import mutation
 
 import { generateColors } from "utils/generateColors";
 import useChartKeys from "hooks/useChartKeys";
@@ -12,16 +20,15 @@ import PieChartComponent from "components/chartsView/PieChartComponent";
 import AreaChartComponent from "components/chartsView/AreaChartComponent";
 import ComboChartComponent from "components/chartsView/ComboChartComponent";
 import ChoroplethMapComponent from "components/chartsView/ChoroplethMapComponent";
-
 import worldGeoJson from "utils/world-geo.json";
 
-// ✅ Format keys like "market_size_usd_" into readable labels
 const formatLabelKey = (key) =>
   key?.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 
-const ChartPreview = ({ chartType = "line", data = [], metadata = {} }) => {
+const ChartPreview = ({ chartType = "line", data = [], metadata = {}, refetch }) => {
   const chartRef = useRef();
   const { xKey, yKeys } = useChartKeys(data);
+  const [deleteChart, { isLoading: deleting }] = useDeleteChartDataMutation(); // ✅ Mutation
 
   const primaryKey = yKeys?.[0] || "market_size_usd_";
 
@@ -32,11 +39,7 @@ const ChartPreview = ({ chartType = "line", data = [], metadata = {} }) => {
 
   const sortedData = useMemo(() => {
     if (!xKey) return data;
-    return [...data].sort((a, b) => {
-      const aVal = a[xKey];
-      const bVal = b[xKey];
-      return new Date(aVal) - new Date(bVal);
-    });
+    return [...data].sort((a, b) => new Date(a[xKey]) - new Date(b[xKey]));
   }, [data, xKey]);
 
   const regionValues = useMemo(() => {
@@ -45,13 +48,12 @@ const ChartPreview = ({ chartType = "line", data = [], metadata = {} }) => {
     data.forEach((entry) => {
       const iso = entry.country?.toUpperCase();
       const val = entry[primaryKey];
-      if (iso && typeof val === "number") {
-        result[iso] = val;
-      }
+      if (iso && typeof val === "number") result[iso] = val;
     });
     return result;
   }, [chartType, data, primaryKey]);
 
+  // ✅ Export as PDF
   const exportToPDF = async () => {
     if (!chartRef.current) return;
     const canvas = await html2canvas(chartRef.current);
@@ -60,6 +62,20 @@ const ChartPreview = ({ chartType = "line", data = [], metadata = {} }) => {
     pdf.text(metadata.name || "Chart Export", 10, 10);
     pdf.addImage(imgData, "PNG", 10, 20, 190, 100);
     pdf.save(`${metadata.title || "chart"}.pdf`);
+  };
+
+  // ✅ Delete chart handler
+  const handleDelete = async () => {
+    if (!window.confirm("Are you sure you want to delete this chart?")) return;
+
+    try {
+      await deleteChart(metadata._id).unwrap();
+      alert("Chart deleted successfully ✅");
+      if (refetch) refetch(); // 🔄 Refresh chart list if provided
+    } catch (err) {
+      alert("Failed to delete chart ❌");
+      console.error(err);
+    }
   };
 
   const renderChart = () => {
@@ -71,13 +87,7 @@ const ChartPreview = ({ chartType = "line", data = [], metadata = {} }) => {
       case "bar":
         return <BarChartComponent {...chartProps} barKeys={yKeys} />;
       case "pie":
-        return (
-          <PieChartComponent
-            {...chartProps}
-            dataKey={yKeys[0]}
-            nameKey={xKey}
-          />
-        );
+        return <PieChartComponent {...chartProps} dataKey={yKeys[0]} nameKey={xKey} />;
       case "area":
         return <AreaChartComponent {...chartProps} areaKeys={yKeys} />;
       case "combo":
@@ -92,11 +102,7 @@ const ChartPreview = ({ chartType = "line", data = [], metadata = {} }) => {
           />
         );
       default:
-        return (
-          <Typography color="error">
-            Unsupported chart type: {chartType}
-          </Typography>
-        );
+        return <Typography color="error">Unsupported chart type: {chartType}</Typography>;
     }
   };
 
@@ -111,33 +117,39 @@ const ChartPreview = ({ chartType = "line", data = [], metadata = {} }) => {
         </Typography>
         <Divider sx={{ my: 2 }} />
         {renderChart()}
-        {chartType !== "pie" &&
-          chartType !== "choropleth" &&
-          chartType !== "map" && (
-            <Stack direction="row" spacing={1} mt={2} flexWrap="wrap">
-              {yKeys.map((key, idx) => (
-                <Chip
-                  key={key}
-                  label={formatLabelKey(key)}
-                  sx={{
-                    backgroundColor: colors[idx % colors.length],
-                    color: "#fff",
-                    fontWeight: 500,
-                  }}
-                />
-              ))}
-            </Stack>
-          )}
+
+        {chartType !== "pie" && chartType !== "choropleth" && chartType !== "map" && (
+          <Stack direction="row" spacing={1} mt={2} flexWrap="wrap">
+            {yKeys.map((key, idx) => (
+              <Chip
+                key={key}
+                label={formatLabelKey(key)}
+                sx={{
+                  backgroundColor: colors[idx % colors.length],
+                  color: "#fff",
+                  fontWeight: 500,
+                }}
+              />
+            ))}
+          </Stack>
+        )}
       </Box>
 
-      <Button
-        onClick={exportToPDF}
-        sx={{ mt: 2 }}
-        variant="outlined"
-        size="small"
-      >
-        Export as PDF
-      </Button>
+      {/* ✅ Action Buttons */}
+      <Stack direction="row" spacing={1} sx={{ mt: 2 }}>
+        <Button onClick={exportToPDF} variant="outlined" size="small">
+          Export as PDF
+        </Button>
+        <Button
+          onClick={handleDelete}
+          variant="contained"
+          color="error"
+          size="small"
+          disabled={deleting}
+        >
+          {deleting ? "Deleting..." : "Delete"}
+        </Button>
+      </Stack>
     </Box>
   );
 };
